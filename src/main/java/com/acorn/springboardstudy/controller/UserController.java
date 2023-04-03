@@ -8,6 +8,7 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @AllArgsConstructor // 🍒객체를 주입 // 🍒모든 필드를 POJO 형식의 생성자로 자동 생성 (컴파일할때! 왜? 어노테이션은 컴파일할때 실행)
@@ -34,6 +35,81 @@ public class UserController {
     // 🍒url 로 요청하는 것은 모두 GET 방식이다!!!
     // 🍒*GET 을 제외한 다른 메서드( ex) POST )는 양식을 제출하거나 ajax 로 페이지를 호출할때만 가능
     // POST : 값을 입력 또는 체크한것을 버튼을 눌렀을대 네트워크 페이로드에 값이 전달이 된다.
+
+
+    // http://localhost:8080/user/user01/detail.do (PathVaribale)
+    // 로그인한 사람만 페이지에 접근가능하게 하고 싶다.
+    // 방법1. filter(intercepter) : 해당 페이지를 요청하기 전에 로그인 했는지 검사(session 에 해당 유저가 있는지 검사)
+    // 방법2. controller : 해당 페이지에서 로그인 했는지 검사(session 에 해당 유저가 있는지 검사)
+    @GetMapping("/{uId}/detail.do")
+    public ModelAndView detail(
+            @SessionAttribute(required = false) UserDto loginUser,
+            // UserDto loginUser = (UserDto) session.getAttribute("loginUser")
+            // 세션객체를 파라미터로 인지해서, 세션이 없으면
+            // 세션객체를 파라미터 취급(required=true) 해서 없으면 400 에러
+            // => 파라미터를 없을수 도 있다~ 라는 처리를 해주기 required=false
+
+            @PathVariable String uId,
+            ModelAndView modelAndView,
+            RedirectAttributes redirectAttributes
+            ){ // ModelAndView : 렌더하는 뷰 설정 + 뷰(html)에 객체를 전달
+
+        if(loginUser==null){ // 로그인유저가 없을때(로그인 안했을때)
+            redirectAttributes.addFlashAttribute("msg","로그인을 해야 이용할수 있는 페이지입니다.");
+            modelAndView.setViewName("redirect:/user/login.do");
+            return modelAndView;
+        }
+
+        UserDto user=userService.detail(uId);
+        modelAndView.setViewName("/user/detail"); // 1. 뷰를 렌더할때
+        modelAndView.addObject("user",user); // 2. user 객체(model)를 쓰겠다.
+
+
+        return modelAndView; // 모델+뷰 를 렌더
+//        return "/user/detail"; // 뷰(html) 렌더 (.html 생략가능)
+    }
+
+    @GetMapping("/signup.do")
+    public void signupForm(){
+        // return signup.html
+    }
+
+    @PostMapping("/signup.do")
+    public String signupAction(@ModelAttribute UserDto user,
+        RedirectAttributes redirectAttributes){ // 성공실패 메세지 보내기위한 파라미터
+        // @ModalAttribute :
+        // @RequestAttribute : 리퀘스트 객체를 모두 가져오는 것 (쿠키,세션, url)
+        log.info(user.toString()); // 로그는 toString() 쓰는것을 권장
+        String errorMsg=null;
+        int signup=0;
+        try{
+            signup=userService.signup(user);
+        }catch (Exception e){
+            log.error(e); // 로그4j 로 파일로 저장할 수 있다.
+            errorMsg=e.getMessage(); // 상세하게 하라고 했지 유저에게 데이터베이스의 에러 내용까지 알려줄 필요는 없다.
+        }
+        if(signup>0){
+            redirectAttributes.addFlashAttribute("msg","회원가입을 축하합니다. 로그인하세요");
+            return "redirect:/";
+        }else{
+            redirectAttributes.addFlashAttribute("msg","회원가입 실패 에러 : " + errorMsg);
+            return "redirect:/user/signup.do";
+        }
+
+    }
+
+
+    @GetMapping("/logout.do")
+    public String logoutAction(
+            HttpSession session,
+            RedirectAttributes redirectAttributes
+           ){
+//        session.invalidate(); // 로그아웃 // 세션에서 제거 (서버재시작은 무조건 로그아웃)
+        session.removeAttribute("loginUser");// 세션 하나만 삭제
+        redirectAttributes.addFlashAttribute("msg","로그아웃 되었습니다."); // ; 세미콜론 찍어야 컴파일
+        return "redirect:/";
+    }
+
 
     // GET 로그인 - 화면렌더
     // "/user/login.do" 동적페이지 정의
@@ -93,43 +169,20 @@ public class UserController {
     // -- end 로그인
 
 
-    @GetMapping("/{uId}/detail.do") // 헐.. ㅜ 경로를 계속 /user/ 를 붙여서 에러가 났음..
-    public String detail(@PathVariable String uId, Model model){
-        UserDto user=null;
-        try{
-            user=userService.detail(uId);
-            model.addAttribute("user", user);
-        }catch (Exception e){
-            e.printStackTrace();
-        }
-        return "/user/detail";
-    }
+//    @GetMapping("/{uId}/detail.do") // 헐.. ㅜ 경로를 계속 /user/ 를 붙여서 에러가 났음..
+//    public String detail(@PathVariable String uId, Model model){
+//        UserDto user=null;
+//        try{
+//            user=userService.detail(uId);
+//            model.addAttribute("user", user);
+//        }catch (Exception e){
+//            e.printStackTrace();
+//        }
+//        return "/user/detail";
+//    }
 
-    @GetMapping("/signup.do")
-    public void signupForm(){
-        // return signup.html
-    }
 
-    @PostMapping("/signup.do")
-    public String signupAction(UserDto user, HttpSession session, RedirectAttributes redirectAttributes){
-        int insert=0;
-        String modalMsg="";
-        String errorMsg=null;
-        try{
-            insert=userService.signup(user);
-        }catch(Exception e){
-            e.printStackTrace();
-            errorMsg=e.getMessage();
-        }
-        if(insert>0){
-            return "redirect:/";
-        }else {
-            modalMsg="에러:"+errorMsg;
-//            session.setAttribute("actionMsg",modalMsg);
-            redirectAttributes.addFlashAttribute("회원가입 에러",modalMsg);
-            return "redirect:/user/signup.do";
-        }
-    }
+
 
 
 

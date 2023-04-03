@@ -60,9 +60,36 @@
         </div>
     </div>
 </nav>
+
+
 <th:block th:if="${msg!=null}"> <!-- msg 메세지가 있으면 (null 이 아니면) -->
-    <script th:inline="javascript"> <!-- th 안에 자바스크립트를 사용하는 방법! -->
-    alert(`[[${msg}]]`) //  세션을 이용한 모달 창 띄우는 방법
+    <div id="actionModal" class="modal" tabindex="-1"> <!-- 자바스크립트에서 modal 을 찾기위해 id 값을 준다.(모달창 안떠서) -->
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">액션 메세지</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p th:text="${msg}"></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        const actionModal=document.getElementById("actionModal");
+        // 부트스트랩 객체 생성시 모달창 띄우기( show() )
+        new bootstrap.Modal(actionModal).show();
     </script>
+
+
+
+    <!-- 🍏모달창  -->
+<!--    <script th:inline="javascript"> &lt;!&ndash; th 안에 자바스크립트를 사용하는 방법! &ndash;&gt;-->
+<!--    alert(`[[${msg}]]`) //  세션을 이용한 모달 창 띄우는 방법-->
+<!--    </script>-->
 </th:block>
 </html>
