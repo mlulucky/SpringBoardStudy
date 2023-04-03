@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.acorn.springboardstudy.mapper.BoardReplyMapper">
+    <resultMap id="BoardReplyMap" type="BoardReplyDto">
+        <id property="brId" column="br_id"/>
+        <id property="bId" column="b_id"/>
+        <id property="uId" column="u_id"/>
+        <id property="parentBrId" column="parent_br_id"/>
+        <id property="postTime" column="post_time"/>
+        <id property="updateTime" column="update_time"/>
+        <id property="imgPath" column="img_path"/>
+        <id property="status" column="status"/>
+        <id property="content" column="content"/>
+        <association property="likes">
+            <result property="like" column="like"/>
+            <result property="bad" column="bad"/>
+            <result property="best" column="best"/>
+            <result property="sad" column="sad"/>
+        </association>
+        <!-- 🍏좋아요 순으로 정렬(ORDER BY) 하려고 조인! -->
+
+        <!-- collection 조인 - 리스트 반환 -->
+        <collection property="replies"
+                    select="findByParentBrId"
+                    column="br_id"
+                    fetchType="lazy"/> <!-- select : 내부맵퍼이므로 맵퍼 경로를 안써도 된다. -->
+        <!-- 대댓글 -->
+    </resultMap>
+    <insert id="insertOne" useGeneratedKeys="true" keyProperty="brId" parameterType="BoardReplyDto">
+        <!-- 키 자동생성. BoardReplyBto 의 brId 에 자동키를 담겠다.
+            useGeneratedKeys="true" : 자동생성. 절대 중복되지 않는다.
+        -->
+        INSERT INTO board_replies (b_id, u_id, parent_br_id, img_path, content)
+            VALUE (#{bId}, #{uId}, #{parentBrId}, #{imgPath}, #{content})
+    </insert>
+    <update id="updateOne" parameterType="BoardReplyDto">
+        UPDATE board_replies
+        SET img_path=#{imgPath}, content=#{content}
+        WHERE br_id=#{brId}
+    </update>
+    <delete id="deleteOne">
+        DELETE FROM board_replies
+        WHERE br_id=#{brId}
+    </delete>
+    <select id="findByBIdAndParentBrIdIsNull" resultMap="BoardReplyMap">
+        SELECT r.*,
+               COUNT(CASE WHEN l.status='LIKE' THEN 1 END) 'like',
+               COUNT(CASE WHEN l.status='BAD' THEN 1 END) 'bad',
+               COUNT(CASE WHEN l.status='BEST' THEN 1 END) 'best',
+               COUNT(CASE WHEN l.status='SAD' THEN 1 END) 'sad'
+            FROM board_replies r LEFT JOIN reply_likes l ON r.br_id=l.br_id
+            WHERE parent_br_id IS NULL AND b_id=#{bId}
+            GROUP BY r.br_id
+            ORDER BY 'like'
+# 조회한것 => 그룹핑 => 정렬 => 페이징
+#     ?조인이 여러개인 경우 USING 을 안쓰고 여러개 쓰는게 좋다.
+    # 댓글 찾기
+    </select>
+
+
+    <select id="findByParentBrId" resultMap="BoardReplyMap">
+    SELECT * FROM board_replies WHERE parent_br_id=#{brId}
+    # 해당 parent_br_id 를 참조하는 대댓글
+    </select>
+
+<!--    ?댓글 수정시 불러올 예정이라 좋아요를 받은 수는 필요없음 -->
+<!--    상세페이지 조회에 사용할 구문-->
+    <select id="findByBrId" resultMap="BoardReplyMap">
+        SELECT * FROM board_replies WHERE br_id=#{brId}
+    # 해당 brId 찾기
+    </select>
+</mapper>

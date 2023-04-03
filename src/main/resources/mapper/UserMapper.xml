@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.acorn.springboardstudy.mapper.UserMapper">
+    <resultMap id="UserMap" type="UserDto">
+        <!--        (mybatis 가 반환타입 DTO 필드명을 기준으로 dto 의 필드명과 테이블의 칼럼명이 같은 것을 맵핑)-->
+        <!--        SELECT *, u_id uId FROM USERS WHERE u_id=#{uId}-->
+        <!--        => SELECT * FROM USERS WHERE u_id=#{uId}-->
+        <id column="u_id" property="uId"/> <!--column : pk -->
+        <result column="name" property="name"/>
+        <result column="pw" property="pw"/>
+        <result column="phone" property="phone"/>
+        <result column="email" property="email"/>
+        <result column="post_time" property="postTime"/>
+        <!-- 테이블의 칼럼명 post_time 을 맵핑할 타입 DTO 의 필드명 postTime 으로 변경 (이름을 동일하게 맞춰준다.) -->
+        <result column="birth" property="birth"/>
+        <result column="img_path" property="imgPath"/>
+        <result column="gender" property="gender"/>
+        <result column="address" property="address"/>
+        <result column="detail_address" property="detailAddress"/>
+        <result column="permission" property="permission"/>
+        <!--        /> :  비어있는. 열고 닫기-->
+    </resultMap>
+    <insert id="insertOne" parameterType="UserDto">
+        INSERT INTO users (u_id, pw, name, phone, img_path, email, birth, gender, address, detail_address)
+        VALUE (#{uId},#{pw},#{name},#{phone},#{imgPath},#{email},#{birth},#{gender},#{address},#{detailAddress})
+    </insert>
+    <update id="updateOne" parameterType="UserDto"> <!-- 파라미터타입 적으면 자동완성 -->
+        UPDATE users SET pw=#{pw},
+                         name=#{name},
+                         phone=#{phone},
+                         img_path=#{imgPath},
+                         email=#{email},
+                         birth=#{birth},
+                         gender=#{gender},
+                         address=#{address},
+                         detail_address=#{detailAddress}
+                         WHERE u_id=#{uId}
+    </update>
+    <update id="updatePwByUId" parameterType="UserDto">
+        UPDATE users SET pw=#{pw} WHERE u_id=#{uId};
+    </update>
+    <delete id="deleteByUIdAndPw" parameterType="UserDto">
+        DELETE FROM users WHERE u_id=#{uId} AND pw=#{pw}
+    </delete>
+
+    <select id="findByUId" resultMap="UserMap">
+        SELECT * FROM users WHERE u_id=#{uId}
+    </select>
+    <select id="findByUIdAndPw" resultMap="UserMap">
+        SELECT * FROM users WHERE u_id=#{uId} AND pw=#{pw}
+    </select>
+    <select id="findUIdByEmailAndPhoneAndName" resultType="java.lang.String">
+        SELECT u_id FROM users WHERE email=#{email} AND phone=#{phone} AND name=#{name}
+    </select>
+
+    <!--    맵핑예시 : resultType 으로 맵핑하는 Dto 에서 u_id(테이블의 칼럼명) 라는 동일한 필드명이 없을때는
+            테이블의 칼럼명을 as 를 이용해 Dto 의 필드명 uId로 가짜 이름(별칭)을 지어주면 resultType 의 Dto 가 uId 를 필드로 가져올 수 있다.
+            => 이것을 일일이 별칭을 지어주기가 귀찮으니까 resultMap 으로 반환하는 타입의 필드명으로 테이블 칼럼명을 동일하게끔 한번에 정의!
+     -->
+<!--    <select id="findByUId" resultType="userDto">-->
+<!--        SELECT *,u_id as uId FROM users WHERE u_id=#{uId}-->
+<!--    </select>-->
+
+
+
+</mapper>

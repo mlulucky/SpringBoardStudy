@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.acorn.springboardstudy.mapper.BoardImgMapper">
+    <resultMap id="BoardImgMap" type="BoardImgDto">
+        <id property="biId" column="bi_id"/>
+        <result property="bId" column="b_id"/>
+        <result property="imgPath" column="img_path"/>
+    </resultMap>
+
+    <insert id="insertOne" useGeneratedKeys="true" keyProperty="biId"> <!-- biId 에 GenerateKey(자동생성 pk) 를 넣겠다. -->
+        INSERT INTO board_imgs (b_id, img_path) VALUE(#{bId}, #{imgPath})
+    </insert>
+    <delete id="deleteOne">
+        DELETE FROM board_imgs WHERE bi_id=#{biId}
+    </delete>
+    <select id="findByBId" resultMap="BoardImgMap">
+        SELECT * FROM board_imgs WHERE b_id=#{bId}
+    </select>
+
+<!--    <select id="findByBId" resultType="BoardImgDto">-->
+<!--        SELECT bi_id biId, b_id bId, img_path imgPath FROM board_imgs WHERE b_id=#{bId}-->
+<!--        🍏resultType : 테이블 칼럼명 Dto 필드명 맵핑(이름동일하게 맞춰주기) // resultMap 사용시 할 필요없다.-->
+<!--         Dto 파싱  -->
+<!--    </select>-->
+</mapper>

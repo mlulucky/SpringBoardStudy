@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<!-- static 폴더 안에 bootstrap 폴더 // bundle : 외부 라이브러리 포함 -->
+<!--<link rel="stylesheet" href="/bootstrap/css/bootstrap.css"> -->
+<!--<script src="/bootstrap/js/bootstrap.bundle.js"></script>-->
+<!-- 🍒control + space bar : 경로 자동완성 -->
+<!-- webjars : 외부라이브러리로 bootstrap 라이브러리 추가 -->
+<link rel="stylesheet" href="/webjars/bootstrap/5.2.3/dist/css/bootstrap.min.css">
+<script src="/webjars/bootstrap/5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<nav class="navbar navbar-expand-lg bg-body-tertiary">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="/">HOME</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
+                aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                <li class="nav-item">
+                    <a class="nav-link" href="/board/list.do">게시판</a> <!-- 동적페이지 경로설정(/board/ 는 가상경로) -->
+                </li>
+            </ul>
+            <div class="d-flex">
+                <ul class="breadcrumb">
+                    <!--          <th:> th 블럭. 구분자, 중괄호 같은 // ${ } : 변수 표시 -->
+                    <th:block th:if="${session.loginUser==null}"> <!-- 로그인 X / 세션의 로그인유저가 null 이면 -->
+                        <li class="breadcrumb-item">
+                            <a class="nav-link" href="/user/login.do">로그인</a>
+                        </li>
+                        <li class="breadcrumb-item">
+                            <a class="nav-link" href="/user/signup.do">회원가입</a>
+                        </li>
+                    </th:block>
+                    <th:block th:if="${session.loginUser!=null}"> <!-- 로그인 했을때 / 세션의 로그인유저가 null 아니면 -->
+                        <li class="breadcrumb-item">
+                            <!-- 타임리프 주소 th:href 는 무조건 @{ } // 파라미터 영역 ( ) // 변수찾기 ${  } -->
+                            <!-- 🍒th:href (파라미터를 생성해주는 속성, url 을 만들어주는 것)가 인코딩도 해주고 파라미터도 받아준다 -->
+                            <!-- 🍒${} 쓰는 이유. url 인코딩은 한글이 깨진다.  -->
+                            <!-- <a class="nav-link" th:href="@{'/user/detail.do'(uId=${session.loginUser.uId})}"> -->
+                            <!--  =>?uId=${ } (🍒UTF-8 인코딩(한글깨짐 X))  => http://localhost:8080/user/detail.do?uId=user01 -->
+                            <!-- <a class="nav-link" th:href="@{'/user/detail.do'(uId='경민')}"> -->
+                            <!--  => ?uId='경민' (🍒url 인코딩(한글깨짐 현상)) => http://localhost:8080/user/detail.do?uId=%EA%B2%BD%EB%AF%BC -->
+
+                             <a class="nav-link" th:href="@{'/user/{uId}/detail.do'(uId=${session.loginUser.uId})}">
+                            <!-- 🍏pathVariable : detail.do 페이지에 꼭 파라미터가 필요한 경우 경로에 파라미터를 보내는 것 -->
+                            <!-- => {uId} 에  ${session.loginUser.uId} 파라미터가 들어간다. -->
+                            <!-- http://localhost:8080/user/user01/detail.do -->
+                            <span th:text="${session.loginUser.uId}"></span> <!-- 타임리프가 get 을 생략해준다. GetUId 를  -->
+                            (<span th:text="${session.loginUser.name}"></span>)
+                            </a>
+                        </li>
+                        <li class="breadcrumb-item">
+                            <a class="nav-link" href="/user/logout.do">로그아웃</a>
+                        </li>
+                    </th:block>
+                </ul>
+            </div>
+
+        </div>
+    </div>
+</nav>
+<th:block th:if="${msg!=null}"> <!-- msg 메세지가 있으면 (null 이 아니면) -->
+    <script th:inline="javascript"> <!-- th 안에 자바스크립트를 사용하는 방법! -->
+    alert(`[[${msg}]]`) //  세션을 이용한 모달 창 띄우는 방법
+    </script>
+</th:block>
+</html>

@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http:/www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+    <header th:include="headerNav.html"></header>
+    <main class="container mx-auto" style="width: 450px;">
+        <form method="post" action="/user/signup.do"  class="mx-auto" style="width: 450px;">
+            <h1 class="my-4">회원가입</h1>
+                <p class="form-floating">
+                    <input type="text" name="uId" class="form-control" placeholder="??">
+                    <label>아이디</label>
+                </p>
+                <p class="form-floating">
+                    <input type="text" name="name" class="form-control" placeholder="??">
+                    <label>이름</label>
+                </p>
+                <p class="form-floating">
+                    <input type="text" name="phone" class="form-control" placeholder="??">
+                    <label>핸드폰</label>
+                </p>
+                <p class="form-floating">
+                    <input type="text" name="imgPath" class="form-control" placeholder="??">
+                    <label>프로필</label>
+                </p>
+                <p class="form-floating">
+                    <input type="text" name="email" class="form-control" placeholder="??">
+                    <label>이메일</label>
+                </p>
+                <p class="form-floating">
+                    <input type="text" name="birth" class="form-control" placeholder="??">
+                    <label>생일</label>
+                </p>
+                <p class="form-floating">
+                    <input type="text" name="address" class="form-control" placeholder="??">
+                    <label>주소</label>
+                </p>
+                <p class="form-floating">
+                    <input type="text" name="detailAddress" class="form-control" placeholder="??">
+                    <label>상세주소</label>
+                </p>
+                <p class="text-end">
+                    <button class="btn btn-outline-warning" type="reset">초기화</button>
+                    <button class="btn btn-outline-info">등록</button>
+                </p>
+
+        </form>
+
+    </main>
+</body>
+</html>

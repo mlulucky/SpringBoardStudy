@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.acorn.springboardstudy.mapper.BoardLikeMapper">
+    <resultMap id="BoardLikeMap" type="BoardLikeDto">
+        <id property="blId" column="bl_id"/>
+        <result property="bId" column="b_id"/>
+        <result property="uId" column="u_id"/>
+        <result property="status" column="status"/>
+    </resultMap>
+    <insert id="insertOne" parameterType="BoardLikeDto">
+        INSERT INTO board_likes (b_id, u_id, status) VALUE(#{bId}, #{uId}, #{status})
+        # 게시글 좋아요 등록(필요 요소 : 보드게시글 번호, 유저아이디, 좋아요상태) // 등록시 파라미터로 넘어온 값을 이용하여 등록
+        # 파라미터 타입 BoardLikeDto - 필드명, 타입을 맞춰준다. (생략해도 mybatis 가 자동으로 맞춰준다)
+    </insert>
+    <update id="updateOne" parameterType="BoardLikeDto">
+        UPDATE board_likes SET status=#{status} WHERE u_id=#{uId} AND b_id=#{bId}
+    </update>
+    <delete id="deleteOne">
+        DELETE FROM board_likes WHERE u_id=#{uId} AND b_id=#{bId}
+    </delete>
+    <select id="countStatusByBId" resultType="LikeStatusCntDto">
+        SELECT
+            COUNT(CASE WHEN status='LIKE' THEN 1 END) as 'like',
+            COUNT(CASE WHEN status='SAD' THEN 1 END) as 'sad',
+            COUNT(CASE WHEN status='BEST' THEN 1 END) as 'best',
+            COUNT(CASE WHEN status='BAD' THEN 1 END) as 'bad'
+            FROM board_likes
+            WHERE b_id=#{bId}
+            # 조회결과 (like=1, sad=0, bad=1, best=0)
+    </select>
+    <select id="countStatusByUId" resultType="LikeStatusCntDto">
+        SELECT
+            COUNT(CASE WHEN status='LIKE' THEN 1 END) as 'like',
+            COUNT(CASE WHEN status='SAD' THEN 1 END) as 'sad',
+            COUNT(CASE WHEN status='BEST' THEN 1 END) as 'best',
+            COUNT(CASE WHEN status='BAD' THEN 1 END) as 'bad'
+        FROM board_likes
+        WHERE u_id=#{uId}
+    </select>
+    <select id="findByBIdAndUId" resultMap="BoardLikeMap">
+        SELECT * FROM board_likes WHERE b_id=#{bId} AND u_id=#{uId}
+        # 유저가 게시글에 좋아요를 했는지 확인 체크하는 쿼리 (좋아요 중복x)
+        # 여기는 디비! 저건 쿼리문! b_id 는 테이블의 컬럼명 , bId 는 Dto 의 필드명이자 파라미터의 이름이다!(왜? 파라미터로 쓰이기때문에)
+    </select>
+
+</mapper>

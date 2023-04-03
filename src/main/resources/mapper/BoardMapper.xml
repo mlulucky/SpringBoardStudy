@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.acorn.springboardstudy.mapper.BoardMapper">
+    <resultMap id="BoardMap" type="BoardDto">
+        <id column="b_id" property="bId"/>
+        <result column="content" property="content"/>
+        <result column="title" property="title"/>
+        <result column="u_id" property="uId"/>
+        <result column="post_time" property="postTime"/>
+        <result column="update_time" property="updateTime"/>
+        <result column="status" property="status"/>
+        <result column="view_count" property="viewCount"/>
+        <association property="likes"
+                        select="com.acorn.springboardstudy.mapper.BoardLikeMapper.countStatusByBId"
+                        column="b_id"
+                        fetchType="lazy"/>
+        <association property="user"
+                    select="com.acorn.springboardstudy.mapper.UserMapper.findByUId"
+                    column="u_id"
+                    fetchType="lazy"/> <!-- 글쓴이 유저가 누군지 확인 --> <!-- 컬렉션이 가장 아래에 위치 -->
+        <!-- 조인하는것처럼 호출되게 하는 -->
+        <collection property="replies"
+                    select="com.acorn.springboardstudy.mapper.BoardReplyMapper.findByBIdAndParentBrIdIsNull"
+                    column="b_id"
+                    fetchType="lazy"/>
+
+        <!-- 🍏collection - 조회(출력) // join 안하고 컬렉션에서 select 로 호출(join 과 같이 동작) // Mapper 인터페이스 필요 -->
+        <collection property="imgs"
+                    select="com.acorn.springboardstudy.mapper.BoardImgMapper.findByBId"
+                    column="b_id"
+                    fetchType="lazy"/> <!-- 조회하는 곳에서만 조인처럼 조회 하겠다. -->
+
+        <!--  🍎collection 복합관계 맵핑 (🍏1:N join 했을때 사용) => 🍏join 안하고 컬렉션에서 select 로 호출하기(권장) -->
+        <!--  ofType : imgs 리스트의 제네릭에 들어갈 데이터 타입 // List <BoardImgDto>  -->
+            <!-- 🍏결과 : resultMap BoardDto 의 필드 imgs -> BoardDto.imgs , List<BoardImgDto> 리스트타입, 제네릭은 BoardImgDto 타입 -->
+            <!-- 🍏collection 의 javaType="java.util.List" 는 기본값이다. 안써도 적용되있음  -->
+<!--        <collection property="imgs" ofType="BoardImgDto" javaType="java.util.List">  -->
+<!--            <id property="biId" column="bi_id"/>-->
+<!--            <result property="bId" column="b_id"/>-->
+<!--            <result property="imgPath" column="img_path"/>-->
+
+<!--            🍏테이블 컬럼명, dto 필드명이 같은데 이렇게 명시를 하는 이유!
+                => collection, association 안에 맵핑할 필드를 꼭 넣어줘야 해서! 안넣으면 값이 아무것도 안들어온다 -->
+<!--            <id property="bi_id" column="bi_id"/>-->
+<!--            <result property="b_id" column="b_id"/>-->
+<!--            <result property="img_path" column="img_path"/>-->
+<!--        </collection> -->
+
+
+
+            <!-- select 된 Mapper 인터페이스의 함수의 조회결과를 property 의 변수명으로 담는것! 변수명 user, replies 가 resultMap 의 BoardDto 클래스의 필드로 조인이 된다!! -->
+            <!-- 보드 : user 관계  => N : 1  => associtation -->
+            <!-- 보드 : reply 댓글 관계  => 1 : N  => collection -->
+<!--        🍏fetchType="eager" : 즉시 조회(호출이 없어도 조회 == 조인 같이 동작)🔥
+            / fetchType="lazy" : 지연로딩(호출이 있는지 검색(뷰) 후 있으면 조회) ex) 리스트에서 댓글이 필요없으면 조회하지 않음.
+            select="namespace.id" : resultMap 으로 조회(<select>)할 때 <collection select 가 있으면> 해당 필드()를 다른 내역을 조회해서 파싱
+            column="b_id : 조회할 sql 의 파라미터로 사용할 칼럼
+
+            서비스애소 실제로 조인은 거의 없다 - fetchType 으로 조인 효과를 낸다.
+        -->
+
+
+<!--        resultMap.collection  =>  1:N or N:N    관계(리스트)일때 조회하는 방법 -->
+<!--        resultMap.association  => N:1 or 1:1     관계 일때 조회하는 방법  -->
+<!--        resultMap 으로 조회를 할때, BoardReplyMapper.findByBIdAndParentBrIdIsNull 가 조회가 되고, 조회된 내역이 replies 에 들어온다.
+            조건은 b_id (조회할때, replies 도 조회하기 => 조인!)
+-->
+        <!-- 1:1 또는 1:N 조인 / 서브쿼리로 쓸 수 있다. -->
+    </resultMap>
+    <!-- namespace 인터페이스를 기반으로 맵퍼를 생성하겠다. -->
+    <!-- SELECT LAST_INSERT_ID : auto increment 로 방금 생성된 id 번호
+        useGeneratedKeys="true" : auto increment 로 pk 를 생성하는가? // LAST_INSERT_ID 호출
+        keyProperty="bId" : 파라미터로 넘어온 BoardDto 에 (keyproperty == boardDto 의 필드명 가 있다.) auto increment 로 생성된 키를 반환하겠다.
+    -->
+    <!-- 🍎2023.3.29 내 개인적으로 처음에 maven 폴더 만들고 gradle 폴더로 옮기면서, Mapper 인터페이스 연결이 잘 안되서, 파라미터 타입을 전체 경로로 강제 지정함  -->
+    <insert useGeneratedKeys="true" keyProperty="bId" id="insertOne" parameterType="BoardDto">
+        INSERT INTO boards (u_id, title, content) VALUE (#{uId},#{title},#{content})
+    </insert>
+    <update id="updateOne" parameterType="BoardDto">
+        UPDATE boards SET title=#{title}, content=#{content} WHERE b_id=#{bId}
+        <!-- 파라미터. BoardDto 가 가진 필드명을 그대로 받는다. -->
+        <!-- 파라미터 타입은 생략가능하다. -->
+    </update>
+    <update id="updateStatusByBId" parameterType="BoardDto">
+        <!-- 파라미터타입을 안적어도 마이바티스가 자동으로 파라미터타입을 맞춰준다 - 이유는? id 에 해당 파라미터 타입으로 쓸 Dto 의 함수 이름을 적었기 때문에 -->
+        UPDATE boards SET status=#{status} WHERE b_id=#{bId}
+    </update>
+    <update id="updateIncrementViewCountBId">
+        UPDATE boards SET view_count=(view_count+1) WHERE b_id=#{bId}
+    </update>
+    <!--    <update id="updateStatusByBId">-->
+<!--        UPDATE boards SET status=#{status} WHERE b_id=#{bId}-->
+<!--    </update>-->
+    <delete id="deleteOne">
+    <!-- <delete id="deleteOne" parameterType="int"> -->
+        <!-- 파라미터 타입 int 로 적기 -> 안적어도 된다
+             int 로 적는건 받는 매개변수가 int 타입 b_id 하나라서,
+             만약 파라미터가 2개가 온다고 했을때, int b_id, String name 이런식일때, 파라미터타입을 int 또는 string 어떤것으로 할지 정할수 없어서 안적는거고,
+             애초에 파라미터 타입을 안 적어도 마이바티스가 자동으로 해당 id 함수의 타입으로 맞춰준다.
+        -->
+        DELETE FROM boards WHERE b_id=#{bId}
+    </delete>
+
+
+    <!-- SELECT 문 -->
+    <select id="findAll" resultMap="BoardMap">
+        SELECT * FROM boards
+
+        # 복합객체맵핑
+        # SELECT b.*,u.name 'user.name' FROM boards b INNER JOIN users u USING (u_id)
+        #  u.name (users 테이블의 필드)를 resultMap 의 BoardMap 의 필드 user(유저정보)의 필드 name -> user.name 으로 맵핑할수있다.
+
+    <!--  🔥복잡객체맵핑 : 조인해서 들고온 결과물을 보드맵에 있는 유저의 필드와 맵핑할 수 있다. -->
+    <!-- 필드명이랑  파라미터 이름이 다르면 값이 안받아진다 -->
+    <!-- resultMap 이 테이블의 row 하나하나를 를 맵핑한다 => association 이 있으면 출력되는 u_id 를 파라미터로 가져와서 맵핑 -->
+    <!-- association : 조인을 하는것보다 쿼리의 재사용성이 높다. // 지연로딩(lazy)을 할 수있다.(조회하고 싶지 않을때 조회하지 않을 수 있다)-->
+    <!-- mybatis 가 호출을하는지 본다 - association 에 있는 것을 제외한다 => 이게 지연로딩 -->
+#     호출을 하면 mybatis가 그것을 보고, association 을 실행 => 이게 지연로딩
+#     spring mybatis 는 쿼리 사용을 보고 있다가 쓰면 안쓰면
+#     지연로딩 -> 데이터 절감 => 비용절감, 속도향
+
+    </select>
+
+    <select id="findByBId" resultMap="BoardMap">
+        SELECT * FROM boards WHERE b_id=#{bId}
+        <!-- bId : findByBId 함수의 매개변수 이름을 그대로 받는다. -->
+    </select>
+
+
+<!--     🍏 association 은  N : 1 join (결과 1개 반환) /  collection 은  1 : N join (결과 여러개(List) 반환)
+            association 은 resultType 으로도 맵핑,조인 가능하지만
+            collection 은 resultMap 으로만 맵핑, 조인 가능하다.
+-->
+
+<!--     1)🍏 1:N (보드 : 이미지)관계 컬렉션 복합관계 맵핑 조인하는 법 => resultMap 에서도 collection 으로 복합맵핑-->
+<!--    <select id="findAll" resultMap="BoardMap">-->
+<!--        SELECT * FROM boards b LEFT JOIN board_imgs i USING (b_id)-->
+<!--        # SELECT b.*,i.bi_id 'imgs.bi_id' FROM boards b LEFT JOIN board_imgs i USING (b_id)-->
+<!--        # board_imgs 테이블의 bi_id 컬럼명을 'imgs.bi_id' 로 다른이름(별칭)으로 조회(출력)-->
+<!--    </select> -->
+<!--     🍏 1:N  복합관계 맵핑은 resultType 으로 맵핑이 안되고(결과가 안나옴), resultMap collection 으로 맵핑을 해야한다. -->
+<!--        <select id="findAll" resultType="boardDto">-->
+<!--            SELECT *,i.bi_id 'imgs.biId', i.img_path 'imgs.imgPath' FROM boards NATURAL JOIN board_imgs i-->
+<!--            🍎결과 : board_imgs 테이블의 bi_id 와 boardDto 의 imgs 의 필드 biId 를 맵핑, 이름을 맞추겠다.
+                   왜? mybatis 가 resultType 으로 정의된 DTO 필드명과 반환되는 테이블의 칼럼명 이름이 같아야지 맵핑을 해서 반환하니까! -->
+<!--            🍉 i.bi_id => board_imgs 테이블의 칼럼명 bi_id    -->
+<!--            🍉 'imgs.biId'
+                    1) imgs : resultType boardDto 의 필드명 // private List<BoardImgDto> imgs
+                    2) BoardImgDto 타입의 imgs 의 BoardImgDto 의 필드명 biId    -->
+<!--        </select>-->
+
+
+<!--     2)🍏 N:1 (보드 : 유저) 관계 복합관계 맵핑 조인 => 보드 조회시 유저는 한명만 나온다.
+            resultMap 에 association user 없어도 됨, 단 resultMap 에 association 이 없기 때문에
+            resultType 을 resultMap 이 아닌 boardDto 로 지정해줘야 한다. (resultMap 에 없으면 resultMap 을 resultType 으로 쓸수 없음 )-->
+
+<!--        🍏resultMap association user 를 쓰게되면 association 이 맵핑을 해주므로
+            1) resultType 대신 resultMap 을 사용
+            2) SELECT * FROM board NATURAL JOIN users 로만 해도 된다. (칼럼명 별칭으로 맵핑 안해도 된다)
+            'user.name' 에서 user 는 boardDto 에서 private UserDto user 의  UserDto 필드 name 을 뜻한다.-->
+
+<!--        <select id="findAll" resultType="boardDto">-->
+<!--            SELECT *,u.name 'user.name', u.phone 'user.phone' FROM boards NATURAL JOIN users u-->
+<!--        </select>-->
+
+</mapper>

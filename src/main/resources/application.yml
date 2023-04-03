@@ -1,0 +1,36 @@
+# 🍏.properties 에서 한글 사용하려면 꼭 인코딩을 utf-8 로 바꾸세요
+# 🍏Spring boot 에 mybatis 가 포함되면 실행할때 꼭 db 접속인 DataSource 를 컨테이너에서 생성(포함)하기 때문에 접속 정보를 꼭 작성해야 한다.
+# 접속해서 데이터 소스 객체를 만든다.
+# yml 파일 : 부모 자손관계로 코드 작성 (== application.properties)
+# datasource(db) : url, username, password
+spring:
+  datasource:
+    url: jdbc:log4jdbc:mysql://localhost:3306/WebAppBoard
+    # log4jdbc 추가
+    # url: jdbc:mysql://localhost:3306/WebAppBoard
+    username: boardServerDev
+    password: mysql123
+    driver-class-name: net.sf.log4jdbc.sql.jdbcapi.DriverSpy
+    # log4jdbc-log4j2-jdbc4.1 라이브러리 종속성 추가 (인텔리제이 다시 실행하기)
+    # (DriverSpy가 mybatis 가 접속할때 같이 접속해서 쿼리를 실행하는걸 스파이처럼 보고있다가 실행 터미널에 로그(내역)을 보내준다)
+
+# 테스트 실행시 로그 sql 출력 : Connection.prepareStatement(SELECT * FROM boards WHERE b_id=?) returned net.sf.log4jdbc.sql.jdbcapi.PreparedStatementSpy@4c50cd7d
+# |-----|-------|----------------------|----------------------|-------|-------------|--------|-----------|
+#|b_id |u_id   |post_time             |update_time           |status |title        |content |view_count |
+#|-----|-------|----------------------|----------------------|-------|-------------|--------|-----------|
+#|9    |user09 |2023-03-13 11:06:28.0 |2023-03-28 09:35:50.0 |REPORT |보드 수정 테스트 안녕 |내용입니다.  |0          |
+#|-----|-------|----------------------|----------------------|-------|-------------|--------|-----------|
+
+#    driver-class-name: com.mysql.cj.jdbc.Driver
+# 최신 드라이버 경로(cj 는 패키지명 추가됨) (4~5년 전 예전 드라이버 : com.mysql.jdbc.Driver)
+
+server:
+  port: 8080
+
+mybatis:
+  type-aliases-package: com.acorn.springboardstudy.dto
+  # mybatis Mapper.xml 에서 패키지 경로를 먼저 설정해두면 resultMap 의 Type 에 경로 안적어도 된다!
+  mapper-locations: mapper/*Mapper.xml
+# mybatis 경로 설정하는 application.yml 파일을 위치 기준으로 경로 작성 - 보통 resources 폴더 안에 만든다.
+# *Mapper.xml => 복수인 이유는 Mapper.xml 파일이 여러개이니까
+# type-aliases-package: 패키지명 설정 / Mapper.xml 파일에서 com.acron.springmavenboard.dto 패키지명을 생략할 수있다.

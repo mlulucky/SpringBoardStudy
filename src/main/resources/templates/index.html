@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>spring board</title>
+</head>
+<body>
+<header th:include="headerNav.html"></header>
+<main class="container">
+    <h1 class="my-4">Spring Boot (Mybatis)로 댓글 게시판 만들기</h1>
+    <h2>maven vs gradle</h2>
+
+    <h2>객체지향(OOP) vs 관점지향(Aspect-Oriented Programing)언어</h2>
+    <ul>
+        <li>객체지향 언어 : 필요할때 객체를 생성 및 사용</li>
+        <li>관점지향 언어 : 사용할 객체를 관리(container(관리) or factory(관리+자동생성))하고 있다가 필요한 곳에 주입(DI 로 관점지향 언어 구현)</li>
+        <li>객체지향 언어 장점 : 코드 작성이 쉽고 흐름이 보인다.(절차적(순서) 언어)</li>
+        <li>관점지향 언어 장점1 : 객체를 필요할때 마다 생성하지 않기 때문에 메모리를 절약한다.(서버환경에서 유리)</li>
+        <li>관점지향 언어 장점2 : 공통 관점으로 코드를 분리해서 중복코드를 줄이고 구조를 단순화 한다.(생산성 up, 유지보수 up)</li>
+        <li>관점지향 언어 장점3 : 객체를 생성하는 코드가 없기 때문에 기능을 동적으로 추가하는 것이 유리</li>
+        <li>객체지향 언어 단점 : 객체를 무분별하게 생성할 가능성이 높다.(가비지컬렉터가 지우지만 한계가 있다)</li>
+        <li>관점지향 언어 단점1 : 구현이 어렵고 흐름이 보이지 않는다.(spring 이 어려운 이유)</li>
+        <li>관점지향 언어 단점2 : 관점지향을 구현하는 프레임워크(spring)에 의존적이다.</li>
+    </ul>
+    <h2>스프링의 관점지향 언어와 MVC 패턴</h2>
+    <ul>
+        <li>자바로 관점지향을 구현했기 때문에 객체지향언어의 장점을 포함한다.</li>
+        <li>🍏스프링 컨테이너가 객체(@Component)를 관리하고 있다가 @Autowired 로 정의된 필드에 주입(또는 생성자로 주입)</li>
+        <li>객체를 주입 : Dependency Injection (DI)</li>
+        <li>(MVC 의 C) @Controller : spring-web 에서 관리하는 객체로 http 통신의 요청과 응답을 처리</li>
+        <li>(MVC 의 M) @Service(Model) : db 접속의 트랜잭션을 관리</li>
+        <li>(MVC 의 V) thymeleaf (Template Engine(컴파일러) : view): src/resources/templates 하위의 html 을 view 로 렌더</li>
+        <!--            타임리프는 문자열을 바로 컴파일 해주는 인터프리터 컴파일러-->
+        <!--            컨트롤러가 컴포넌트를 상속받고있다 -->
+        <!--            컨테이너는 객체를 관리하고, 의존성 객체주입 기능을 제공한다 -->
+        <!--            처음 생성된 패키지의 Application 파일 @ComponentSacn 을 가짐 => 해당 클래스가 위치한 디렉토리(패키지) 전체를 컴포넌트 스캔
+                        즉 처음 생성된 패키지 com.acorn.springmavenboard 하위 파일들 == 컴포넌트 스캔으로 Bean 객체에 등록
+        -->
+    </ul>
+    <h2>spring-mybatis</h2>
+    <ul>
+        <li>mybatis : xml 로 작성된 sql 을 java 객체로 맵핑</li>
+        <li>spring-mybatis : spring 에서 mybatis 를 사용할수 있도록 최적화 되어있고
+            sql(session)을 객체로 생성 관리하는 컨테이너(session-factory)를 제공
+            <!-- session-factory : sql(session) 을 객체로 생성 관리하는 컨테이너 -->
+            <!-- mybatis 를 session-factory 라고도 부른다. -->
+        </li>
+        <!-- 동작원리 -->
+        <li>Mapper 인터페이스 작성(@Mapper) : mybatis 는 @Mapper 가 정의된 인터페이스를 Mapper.xml 에 정의된 sql 로 java (DTO) 맵핑하는 컴포넌트를 생성</li><!-- => 생성된 컴포넌트가 sql 을 실행해서 결과를 맵핑 / 자바 객체를 반환  -->
+        <li>Mapper xml : sql(Session) 을 관리하고 테이블의 관계를 정의해서 조인을 할 수 있다.</li> <!-- 따라서 Mybatis 를 session-factory 라고 부른다. -->
+        <li>**사용할 곳에서 의존성 주입(DI:Dependency Injection) 받기 : session-factory 가 @Mapper 로 정의된 인터페이스를 객체로 만들어서 주입</li>
+        <!-- @Mapper : MyBatis 프레임워크에서 사용되는 어노테이션 -->
+        <!-- 🍎@Mapper 은 인터페이스에 적용되며, MyBatis 에서 해당 인터페이스를 구현하는 클래스를 생성 및 자동으로 DTO 를 맵핑하는 인스턴스(객체)화 -->
+        <!-- => ex) MapperTest 파일에서 인터페이스 테스트시 @Autowired 로 @Mapper 인터페이스(BoardMapper)를 의존성 주입하면 바로 객체로 쓸수 있다.-->
+        <!-- => 원래는 인터페이스는 타입으로 쓸수가 없고 (인터페이스를 구현하는 클래스로 타입을 만들 수 있음) -->
+        <!-- => 그리고 private BoardMapper boardMapper 으로 선언한것은 boardMapper=null(자료형기본값)과 같은데 객체로 쓸 수 있다. new BoardMapper() 이렇게 객체를 생성하지 않았는데 -->
+        <!-- 🍎@Mapper 가 적용된 (mybatis 가 클래스로 생성하는) 인터페이스는 Mapper.xml 을 기반으로 SqlSessionFactory 에서 생성된 SQL(세션,쿼리) 을 사용하여 데이터베이스와 상호 작용합니다. -->
+    </ul>
+    <h3>Spring Mybatis 설정</h3>
+    <ol>
+        <li>DataSource : resources > application.properties(.yml) > spring:datasource:(url,username,password,driver-class-name) 작성
+            (spring 컨테이너에서 db 를 접속 관리하는 객체 생성 => mybatis 컴포넌트(컨테이너)에 자동으로 주입)
+        </li>
+        <li>resources 하위에 mapper.xml 폴더를 만들고 application.properties 에 mybatis:mapper-locations 작성</li>
+        <li>인텔리제이의 MybatisX 플러그인 설치</li>
+        <li>@Mapper 인터페이스 생성 및 추상메서드 정의</li>
+        <li>인터페이스에서 화면 마우스 오른쪽 클릭 > show Context Action > [MybatisX] Generate Mybatis xml 클릭 후 mapper-locations 에 지정한 폴더에 xml 생성</li>
+        <!-- [MybatisX] Generate Mybatis xml 생성 : 인텔리제이에서 자동생성 해주는 기능 -->
+        <li></li>
+    </ol>
+    <h3>Mapper.xml 정의 방법</h3>
+    <ul>
+        <li>mapper namespace="@Mapper 의 타입" : mybatis 가 컨포넌트(컨테이너에서 관리되는 객체)로 생성할 타입</li> <!-- <mapper namespace="">: 인터페이스 연결(어떤 인터페이스를 구현할 건지) (패키지이름.인터페이스 파일이름)-->
+        <li>id="추상메서드 이름" : 쿼리가 실행될 메서드 정의</li>
+        <li>select : DQL 작성할 때 사용하는 태그 🍎**꼭!! resultType or resultMap 을 작성해야한다
+            <ul>
+                <li>select 는 무조건 resultType 으로 정의된 객체나 java.util.List(컬렉션) 를 반환</li><!-- List : 컬렉션 프레임워크 안에 있어서 컬렉션이라고도 부른다. -->
+                <li>만약 @Mapper 인터페이스 파일에 추상메서드에서 객체(결과 1개)만 반환한다고 했는데 sql select 문에서 복수(결과가 여러개)가 반환되면 오류가 발생한다.</li>
+                <li>🍎resultType 으로 정의된 DTO 필드명과 반환되는 테이블의 칼럼명 이름이 같아야지 (동일한 이름이 있다면) 맵핑을 해서 반환</li>
+                <li>만약 테이블의 칼럼명과 DTO 의 필드명이 다르면 as 로 필드와 같은 이름을 만들거나 resultMap 을 정의하면 된다.
+                    테이블의 칼럼명과 필드명이 다른이유는 ?
+                    대부분의 db(예 mysql) 는 대소문자를 구분하지 않더라 => 이름(칼럼명) 규칙으로 _ 를 사용, 자바는 변수명의 규칙 낙타표기법(카멜케이스)을 사용(상수=="_")
+                    예) select U_ID from BOARDS == select u_id from boards == select u_Id from BOARDS
+                </li>
+                <li>
+                    만약 반환되는 타입을 resultMap 을 사용한다면 association, collection 으로 정의된 필드는 한번 더 조회를 한다.(조인처럼 동작, 조인대신 사용)
+                </li>
+                <!--    resultType 으로 맵핑하는 Dto 에서 u_id(테이블의 칼럼명) 라는 동일한 필드명이 없을때는
+                        테이블의 칼럼명 u_id 을 as 를 이용해 Dto 의 필드명 uId로 가짜 이름(별칭)을 지어주면 resultType 의 Dto 가 uId 를 필드로 가져올 수 있다.
+                        => 이것을 일일이 별칭을 지어주기가 귀찮으니까 resultMap 으로 반환하는 타입의 필드명으로 테이블 칼럼명을 동일하게 한번에 정의!
+                 -->
+                <!--    <select id="findByUId" resultType="userDto">-->
+                <!--        SELECT *,u_id as uId FROM users WHERE u_id=#{uId}-->
+                <!--    </select>-->
+                <!--  🍏resultMap DTO 맵핑은 셀렉트. 조회할때 값. 타입을 반환할때 맵핑 이름(DTO 필드명)이 같아야하는거고 -->
+                <!--  🍏성공의 개수를 반환할때는 반환하는 것으로 (객체타입 반환x) resultMap 으로 맵핑안해도 되고 ParameterType 으로 DTO 필드명과 타입을 사용 -->
+            </ul>
+        </li>
+        <li>delete, update, insert : DML 을 작성할 때 사용하고 몇개 성공했음의 정수(int,long 타입 이용)를 반환</li> <!-- DML(Data Manipulation Language) : 데이터를 조작하는 언어 / 예) db 테이블의 데이터를 삭제, 수정, 등록 -->
+        <li>mybatis 와 매개변수(PreparedStatement) : Dto 의 필드명이나 변수명을 #{} 안에 작성하면 매개변수(파라미터)로 동작</li>
+        <li>만약 필드명이나 변수명을 사용하고 싶지 않다면 @Param(value="바꿀이름")을 작성하면 된다.</li>
+        <li>order by 에서 필드명을 매개변수로 받아야 한다면 ${} 안에 작성하면 된다. (order by - 페이징에서 정렬에 사용하는 쿼리문)
+            예) order by #{Dto 필드명} => order by 'b_id' (🍒동작 x) // 문자열이 들어온다(#{ } 문자열 취급). 이 경우 동작하지 않는 db(데이터베이스)들이 많다.
+            => 'b_id' -> b_id 로 문자열을 떼 줘야한다. => ${ } 로 필드명 받기 => order by ${Dto 필드명} => order by b_id (🍒문자열이라도 b_id 로 받아온다)
+            #{ } : 문자열이면 문자열. 정수면 정수로 맵핑해준다. (== PreparedStatement) => 예) WHERE u_id=#{uId} / WHERE b_id=#{bId}
+            SELECT * FROM boards ORDER BY b_id  => ORDER BY #{b_id}  => 🍒#{ } 는 파라미터 취급을 해서 'b_id' 문자열로 바꾼다.
+        </li>
+    </ul>
+
+    <h3>resultMap</h3>
+    <p>질의(DQL)의 결과를 자바객체(POJO,DTO)에 맵핑하는 역할과 객체간의 연관성을 표현</p>
+    <ul>
+        <li>객체의 필드와 테이블 칼럼 맵핑</li>
+        <li>복합 객체 맵핑 : DTO 에 존재하는 복수의 필드를 관계로 맵핑</li> <!-- BoardDto.user (BaordDto 안에 user 필드) -->
+        <li>상속 관계 맵핑 : 상속관계에 있는 DTO 의 부모타입으로 맵핑</li>
+        <li>🍒컬렉션 맵핑 : 해당 테이블과 참조 관계에 있는 다른 테이블의 복수의 값을 조회해서 맵핑 가능</li>
+
+        <li>collection(List(default),Map,Set (리스트컬렉션)반환), association(Dto 1개 반환) : 해당 테이블과 참조 관계에 있는 다른 테이블을 조회</li>
+        <li>property : 조회해서 맵핑할 필드(Dto 필드)</li>
+        <li>select : 조회할 session(mybatis 에서 관리하는 sql) id</li>
+        <!-- 예) BoardMapper.xml 에서 UserMapper 를 조인할때 UserMapper 는 외부맵퍼 / BoardMapper 인 경우 내부맵퍼
+             외부맵퍼 : 외부 맵퍼의 이름(전체경로).session id 쓰기 => select="com.acorn.springboardstudy.mapper.UserMapper.findByUId"
+             내부맵퍼 : 맵퍼의 id 만 쓰면 된다. => select="findByUId"
+         -->
+        <li>column : 조회할 sql 에 파라미터로 제공할 칼럼</li>
+        <li>fetchType : [ eager || lazy ] 조회할 방식으로 즉시로딩과 지연로딩 설정할 수 있다.</li>
+        <li>지연로딩(lazy) : collection,association 에 정의한 필드를 (view 에서) 호출(트리거)하면 조회</li>
+        <li>즉시로딩(eager) : 호출(트리거)이 있지 않아도 조회</li>
+    </ul>
+    <h2>webJar</h2>
+    <p>Gradle 과 Maven 같은 빌드 및 자바 라이브러리(jar) 관리 도구에서 클라이언트(js,css) 측 라이브러리를 관리하는 방법</p> <!-- ex) 부트스트랩 -->
+
+
+<!-- 복합객체 맵핑
+     <select id="findAll" resultMap="BoardMap">
+        # SELECT b.*,u.name 'user.name' FROM boards b INNER JOIN users u USING (u_id)
+        #  u.name (users 테이블의 필드)를 resultMap 의 BoardMap 의 필드 user(유저정보)의 필드 name -> user.name 으로 맵핑할수있다.
+    </select>
+-->
+<!--
+     🍎조인 대신 association, collection 맵핑을 하는 이유
+     1. 쿼리의 재사용이 좋다. 쿼리가 간단하다
+     2. 지연로딩을 할 수 있다. 매번 조회하는게 아니라 조회하고 싶을때만 조회
+
+     🍎mybatis 는 뷰(view - html)를 감시한다
+     뷰에서 association 한 join 한 데이터를 사용하는지 안하는지를 감시하고 있다가 association sql 쿼리를 실행한다.
+
+     mybatis 가 association 한 join 한 데이터 호출(출력)하는지 감시를 하다가
+     호출(출력)을 안하면 association 을 조회(출력)에서 제외,
+     호출(출력)을 하면 association 을 실행 및 조회(출력) => 🍏지연로딩(lazy)
+
+     호출에 상관없이 무조건 association 실행 및 데이터 호출 => 🍏즉시로딩(eager)
+
+     🍎지연로딩의 장점
+     데이터를 덜 조회하니까 => 비용이 절감,
+     매번 가져오지 않으니까 => 속도가 빠르다
+
+   -->
+
+
+</main>
+</body>
+</html>
