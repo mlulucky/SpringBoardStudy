@@ -42,14 +42,15 @@
         DELETE FROM board_replies
         WHERE br_id=#{brId}
     </delete>
-    <select id="findByBIdAndParentBrIdIsNull" resultMap="BoardReplyMap">
+    <select id="findByBIdAndParentBrIdIsNull" resultMap="BoardReplyMap"><!-- resultMap 호출하면 자동으로 맵핑 + 조인 -->
         SELECT r.*,
                COUNT(CASE WHEN l.status='LIKE' THEN 1 END) 'like',
                COUNT(CASE WHEN l.status='BAD' THEN 1 END) 'bad',
                COUNT(CASE WHEN l.status='BEST' THEN 1 END) 'best',
                COUNT(CASE WHEN l.status='SAD' THEN 1 END) 'sad'
             FROM board_replies r LEFT JOIN reply_likes l ON r.br_id=l.br_id
-            WHERE parent_br_id IS NULL AND b_id=#{bId}
+            WHERE parent_br_id IS NULL # 부모댓글아이디가 null 이라는 건 댓글!
+              AND b_id=#{bId}
             GROUP BY r.br_id
             ORDER BY 'like'
 # 조회한것 => 그룹핑 => 정렬 => 페이징
@@ -59,7 +60,15 @@
 
 
     <select id="findByParentBrId" resultMap="BoardReplyMap">
-    SELECT * FROM board_replies WHERE parent_br_id=#{brId}
+        SELECT r.*,
+               COUNT(CASE WHEN l.status='LIKE' THEN 1 END) 'like',
+               COUNT(CASE WHEN l.status='BAD' THEN 1 END) 'bad',
+               COUNT(CASE WHEN l.status='BEST' THEN 1 END) 'best',
+               COUNT(CASE WHEN l.status='SAD' THEN 1 END) 'sad'
+        FROM board_replies r LEFT JOIN reply_likes l ON r.br_id=l.br_id
+        WHERE parent_br_id=#{brId} # 부모댓글아이디가 댓글아이디라는건 대댓글!
+        GROUP BY r.br_id
+        ORDER BY 'like'
     # 해당 parent_br_id 를 참조하는 대댓글
     </select>
 

@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{/layout}">
+<head>
+    <meta charset="UTF-8">
+    <title>게시판 상세</title>
+</head>
+<div layout:fragment="content">
+    <h1 class="my-4">게시판 상세</h1>
+<!--    <p th:text="${boards}"></p>--> <!-- 게시글 불러와지는지 체크 (컨트롤러에서 boards 객체를 보냄)-->
+    <section id="boardCont" class=""> <!-- g : 요소간의 간격 --> <!-- md 사이즈일때만, 그리드의 비율을 3개로 / row-cols-1 : 스몰사이즈일때 -->
+        <div class="row"> <!-- display 가 md 이상일때 플렉스 -->
+            <div id="carouselExampleControls2" class="carousel slide d-none d-md-block col pe-0" data-bs-ride="carousel"> <!-- d-none d-md-block : 안보였다가 display md 이상일때 보이게  -->
+                <div class="carousel-inner">
+                    <div class="carousel-item active">
+                        <img src="/public/img/board/춘식이라이언.jpg" class="d-block w-100" alt="게시글 이미지">
+                    </div>
+                </div>
+                <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleControls" data-bs-slide="prev">
+                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                    <span class="visually-hidden">Previous</span>
+                </button>
+                <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleControls" data-bs-slide="next">
+                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                    <span class="visually-hidden">Next</span>
+                </button>
+            </div>
+            <div class="col ps-0"> <!-- card 에 col 을 주면 여백이 생겨서 col, card 따로 주기 -->
+                <!-- 🍏컴퓨터 화면에 보이는 브라우저 크기 : viewport 크기 , 화면에 보이는 높이 : 100vh (100%) -->
+                <div class="card col" style="height: 70vh; overflow-y: auto"> <!-- boards 의 요소만큼을 반복해서 하나씩 배오기 (반복문) -->
+<!--                <div class="card col overflow-scroll" style="height: 70vh;"> &lt;!&ndash; boards 의 요소만큼을 반복해서 하나씩 배오기 (반복문) &ndash;&gt;-->
+                    <div class="card-header d-flex justify-content-between align-items-center
+                                bg-light position-sticky top-0" style="z-index: 999"> <!-- 오른쪽 끝으로 보내기 / stretch 속성으로 아이콘이 위로 올라간다 => 세로중아 맞추기 align-items-center -->
+                        <!--  sticky 속성으로 태그가 따라온다.  -->
+                        <div>
+                            <!-- 있을때만 이미지를 출력하겠다 th:if="${b.user.imgPath!=null}" -->
+                            <img  th:if="${b.user.imgPath!=null}"
+                                  th:src="@{'{path}'(path=${b.user.imgPath})}"
+                                  alt="프로필이미지"
+                                  style="width: 50px; object-fit: cover;" class="img-thumbnail"> <!-- object-fit:cover - 사진비율 맞춰준다. -->
+                            <strong class="ms-2" th:text="${b.user.uId}"></strong> <!-- margin-start -->
+                            (<strong th:text="${b.user.name}"></strong>)
+                        </div>
+                        <div class="dropdown">
+                            <a href="#" role="button" class="" data-bs-toggle="dropdown"> <!-- a태그 버튼으로 역할주기 -->
+                                <i class="bi bi-three-dots fs-4"></i> <!-- fs : font-size --> <!-- 웹자르 라이브러리는 추가후에 서버를 껏다 켜야 적용이 된다. -->
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li>
+                                    <a class="dropdown-item" th:href="@{'/board/{bId}/detail.do'(bId=${b.bId})}">글 상세</a>
+                                </li>
+                                <li><a class="dropdown-item" href="#">글쓴이가 작성한 글목록</a></li>
+                                <li><a class="dropdown-item" href="#">계정 정보</a></li>
+                                <li>
+                                    <a class="dropdown-item text-danger" href="#">
+                                        <i class="bi bi-bell"></i>
+                                        신고
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div id="carouselExampleControls" class="carousel slide d-md-none" data-bs-ride="carousel"> <!-- d-md-none : display md 이상일때 안보이게  -->
+                            <div class="carousel-inner">
+                                <div class="carousel-item active">
+                                    <img src="/public/img/board/춘식이라이언.jpg" class="d-block w-100" alt="게시글 이미지">
+                                </div>
+                            </div>
+                            <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleControls" data-bs-slide="prev">
+                                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                <span class="visually-hidden">Previous</span>
+                            </button>
+                            <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleControls" data-bs-slide="next">
+                                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                <span class="visually-hidden">Next</span>
+                            </button>
+                        </div>
+                        <div>
+                            <div class="d-flex my-2">
+                                <div class="me-2">
+                                    작성일 : <small th:text="${#dates.format(b.postTime,'yyy-MM-dd')}"></small> <!-- date.format(데이트객체, 포맷) 으로 날짜 예쁘게 수정하기 -->  <!-- b.postTime 자바객체 : Tue Mar 28 11:34:12 KST 2023 -->
+                                </div>
+                                <div>
+                                    수정일 : <small th:text="${#dates.format(b.updateTime,'yyy-MM-dd')}"></small>
+                                </div>
+                            </div>
+                            <h5 class="card-title" th:text="${b.title}"></h5>
+                            <p class="card-text" th:text="${b.content}"></p>
+                            <hr>
+                            <h6 class="card-title d-flex justify-content-between align-items-center">
+                                <span>댓글 리스트</span>
+                                <button type="button" class="btn btn-light" th:onclick="loadReplies([[${b.bId}]])">새로고침</button>
+                            </h6>
+                            <div id="replyCont"> <!-- 댓글 -->
+<!--                                <p th:text="${b.replies}"></p>-->
+                                    <ul class="list-group"> <!-- overflow 넘치면 scroll 주겠다. -->
+                                        <li class="list-group-item" th:each="r:${b.replies}">
+                                            <th:block th:include="/reply/detail"></th:block> <!-- reply 폴더안에 detail.html 파일  -->
+                                        </li>
+                                    </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-footer position-sticky bottom-0 bg-light">
+                        <div class="d-flex align-items-center">
+                            <div class="likesCont"> <!-- 툴팁 - 레이아웃파일에 자바스크립트 추가해야함. -->
+                                <a href="#" class="btn btn-sm btn-link" data-bs-toggle="tooltip" data-bs-title="좋아요" data-bs-placement="top">
+                                    <i class="bi bi-emoji-heart-eyes text-danger fs-4"></i> <!-- bi : bootstrap icon -->
+                                    <span th:text="${b.likes.like}"></span> <!-- 지연로딩으로 불러온다 -->
+                                </a>
+                                <a href="#" class="btn btn-sm btn-link" data-bs-toggle="tooltip" data-bs-title="최고야" data-bs-placement="top">
+                                    <i class="bi bi-emoji-sunglasses fs-4"></i>
+                                    <span th:text="${b.likes.best}"></span>
+                                </a>
+                                <a href="#" class="btn btn-sm btn-link" data-bs-toggle="tooltip" data-bs-title="나빠요" data-bs-placement="top">
+                                    <i class="bi bi-emoji-expressionless fs-4"></i>
+                                    <span th:text="${b.likes.bad}"></span>
+                                </a>
+                                <a href="#" class="btn btn-sm btn-link" data-bs-toggle="tooltip" data-bs-title="슬퍼요" data-bs-placement="top">
+                                    <i class="bi bi-emoji-frown fs-4"></i>
+                                    <span th:text="${b.likes.sad}"></span>
+                                </a>
+                            </div>
+                            <small class="text-muted">•</small>
+                            <div class="viewCont ms-2"  data-bs-toggle="tooltip" data-bs-title="조회수" data-bs-placement="top">
+                                <i class="bi bi-eye fs-4"></i>
+                                조회수 : <span th:text="${b.viewCount}"></span>
+                            </div>
+                        </div>
+
+                        <!-- 댓글입력 폼을 로그인 한 사람에게만 보여준다. => th:if  // 안그러면(로그인 안한 사람이 페이지를 요청하면) 에러메세지가 뜬다.-->
+                        <form enctype="multipart/form-data" name="replyInsertForm" action="/reply/insert.do" method="post" th:if="${session.loginUser!=null}">
+                            <!-- enctype="multipart/form-data"  blob 파일_이미지 을 보내겠다 -->
+                            <!-- form enctype="application/x-www-form-urlencoded"  쿼리스트링을 문자열로 보내겠다 - url 인코딩 - 기본값-->
+                            <hr>
+                            <!-- 댓글은 로그인한 사람만 쓸 수 있다.// value 값이 서버로 넘어간다. -->
+                            <input type="hidden" name="uId" th:value="${session.loginUser.uId}">
+                            <input type="hidden" name="bId" th:value="${b.bId}">
+
+                            <div class="mb-2 row justify-content-end">
+                                <div class="col-3 p-0"> <!-- form-control 은 100%가 되려하기 때문에 col 속성이 안먹어서 따로 div에 속성을 부여 -->
+                                    <input placeholder="부모댓글" type="text" readonly class="form-control" name="parentBrId"> <!-- => BoardReplydto 의 parentBrId가 받는다. --> <!-- 댓글 달기 눌렀을때 댓글의 번호가 들어온다. -->
+                                </div>
+                                <div class="col p-0"> <!-- col 나머지 너비를 다 갖겠다. -->
+                                    <input placeholder="댓글" type="text" class="form-control" name="content">
+                                </div>
+                                <button class="btn btn-primary col-auto">제출</button>
+                                <label class="btn btn-info col-auto"> <!-- col-auto : content-fit 요소의 크기만큼  -->
+                                    <i class="bi bi-file-image text-light"></i>
+                                    <input class="d-none" type="file" name="img">
+                                </label>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!--  댓글 수정폼 모달창  -->
+        <div id="replyModifyModal" class="modal" tabindex="-1">
+            <div class="modal-dialog">
+                <form class="modal-content" name="replyModifyForm" method="post" enctype="multipart/form-data">
+                    <input type="text" name="bId"> <!-- 게시글아이디 받기 -->
+                    <input type="text" name="brId">
+                    <input type="text" name="imgPath">
+                    <div class="modal-header">
+                        <h5 class="modal-title">리플 수정폼</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div id="replyModifyModalBody" class="modal-body"> <!-- 내용이 들어가는 태그에는 id 를 주는것이 좋다. -->
+                        <p class="form-floating">
+                            <input type="text" name="uId" readonly class="form-control" placeholder="글쓴이">
+                            <label>글쓴이</label>
+                        </p>
+                        <p>
+                            <img name="imgPath" src="" alt="댓글 이미지"> <!-- 원본 이미지 -->
+                        </p>
+                        <p class="form-floating">
+                            <input type="text" name="parentBrId" readonly class="form-control" placeholder="참조하는 부모 댓글">
+                            <label>참조하는 부모 댓글</label>
+                        </p>
+                        <p>
+                            <input type="file" name="img" class="form-control"> <!-- 수정하는 이미지 -->
+                        </p>
+                        <p class="form-floating">
+                            <input type="text" name="content" class="form-control" placeholder="내용">
+                            <label>내용</label>
+                        </p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary">수정</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+    </section>
+    <script th:inline="javascript">
+        const replyModifyModal=new bootstrap.Modal(document.getElementById("replyModifyModal"),{});
+        const replyCont=document.getElementById("replyCont");
+        const replyInsertForm=document.forms["replyInsertForm"]
+        const replyModifyForm=document.forms["replyModifyForm"]
+        // 자바스크립트에서 타임리프 변수 사용하려면 대괄호 2개
+        async function loadReplies(bId){
+            let url=`/reply/${bId}/list.do`
+            const resp=await fetch(url); // url 페이지 불러오기 (ReplyController 에 있는 동적페이지 - /reply/list html 렌더 반환 )
+            if(resp.status==200){
+                alert("댓글 리스트 로드 성공");
+                let text=await resp.text(); // html 을 텍스트로 가져옴.
+                replyCont.innerHTML="";
+                setTimeout(()=>{
+                    replyCont.innerHTML="<h1>리로드</h1>"+text; // InnerHTML 에 반영
+                },1000);
+
+            }
+            // console.log(text);
+            // ajax 비동기 통신으로 불러올것 => fetch / async,await
+        }
+
+        replyInsertForm.onsubmit=registerReply;
+
+        async function registerReply(e){ // 매개변수 e 를 받아야 한다.
+            e.preventDefault();
+            // multipart/form-data 로 지정된 form 은 new FormData(formNode) 객체를 생성해서 body 에 추가
+            const data=new FormData(replyInsertForm);
+            let url="/reply/handler.do" // register:1(등록성공), 0(실패)
+            const resp=await fetch(url,{method:"POST", body:data});  // => blob 데이터를 파라미터로 저장. 전송
+            if(resp.status==200){
+                const json=await resp.json(); // json 으로 불러오기
+                if(json.register>0){
+                    alert("등록성공");
+                    await loadReplies(replyInsertForm.bId.value);
+                }
+                console.log(json);
+            }else {
+                alert("등록실패 status: " + resp.status);
+            }
+        }
+
+        async function loadModifyReply(brId){ // 수정폼 버튼 클릭시 실행되는 함수
+            // alert(brId); // 기능하는지 테스트
+            let url=`/reply/${brId}/detail.do`;
+            const resp=await fetch(url);
+            if(resp.status==200){
+                const json=await resp.json();
+                replyModifyModal.show();
+            }else {
+                alert("불러오기 실패 status:" + resp.status);
+            }
+
+        }
+
+
+    </script>
+</div>
+</html>

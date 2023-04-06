@@ -11,6 +11,22 @@ spring:
     username: boardServerDev
     password: mysql123
     driver-class-name: net.sf.log4jdbc.sql.jdbcapi.DriverSpy
+  servlet:
+    multipart:
+      location: ${user.dir}/SpringBoardStudy/src/main/resources/static/public/img
+        # 파일이 저장되는 임시저장소(경로) user.dir : 인텔리제이가 실행되는 폴더(/Users/moon/eunjeong/webAppStudy20230117)
+      max-file-size: 1MB
+      # 1MB 이상 파일은 못 올린다.
+      max-request-size: 5MB
+      # 1MB 파일 이미지를 5개 등록하고 싶다 => 5MB 설정
+      # 컨트롤러에서 멀티파트 파일을 받을 수 있다.
+img:
+  upload:
+    path:  ${user.dir}/SpringBoardStudy/src/main/resources/static/public/img
+    # 실제로 파일을 쓸곳, 지정설정
+
+
+
     # log4jdbc-log4j2-jdbc4.1 라이브러리 종속성 추가 (인텔리제이 다시 실행하기)
     # (DriverSpy가 mybatis 가 접속할때 같이 접속해서 쿼리를 실행하는걸 스파이처럼 보고있다가 실행 터미널에 로그(내역)을 보내준다)
 
@@ -24,6 +40,7 @@ spring:
 #    driver-class-name: com.mysql.cj.jdbc.Driver
 # 최신 드라이버 경로(cj 는 패키지명 추가됨) (4~5년 전 예전 드라이버 : com.mysql.jdbc.Driver)
 
+
 server:
   port: 8080
 
@@ -34,3 +51,5 @@ mybatis:
 # mybatis 경로 설정하는 application.yml 파일을 위치 기준으로 경로 작성 - 보통 resources 폴더 안에 만든다.
 # *Mapper.xml => 복수인 이유는 Mapper.xml 파일이 여러개이니까
 # type-aliases-package: 패키지명 설정 / Mapper.xml 파일에서 com.acron.springmavenboard.dto 패키지명을 생략할 수있다.
+
+

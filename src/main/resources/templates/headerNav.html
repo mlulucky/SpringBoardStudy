@@ -5,9 +5,6 @@
 <!--<script src="/bootstrap/js/bootstrap.bundle.js"></script>-->
 <!-- 🍒control + space bar : 경로 자동완성 -->
 <!-- webjars : 외부라이브러리로 bootstrap 라이브러리 추가 -->
-<link rel="stylesheet" href="/webjars/bootstrap/5.2.3/dist/css/bootstrap.min.css">
-<script src="/webjars/bootstrap/5.2.3/dist/js/bootstrap.bundle.min.js"></script>
-
 <nav class="navbar navbar-expand-lg bg-body-tertiary">
     <div class="container-fluid">
         <a class="navbar-brand" href="/">HOME</a>
@@ -61,8 +58,7 @@
     </div>
 </nav>
 
-
-<th:block th:if="${msg!=null}"> <!-- msg 메세지가 있으면 (null 이 아니면) -->
+<th:block th:if="${msg!=null || session.msg!=null}"> <!-- msg 메세지가 있으면 (null 이 아니면) -->
     <div id="actionModal" class="modal" tabindex="-1"> <!-- 자바스크립트에서 modal 을 찾기위해 id 값을 준다.(모달창 안떠서) -->
         <div class="modal-dialog">
             <div class="modal-content">
@@ -72,6 +68,7 @@
                 </div>
                 <div class="modal-body">
                     <p th:text="${msg}"></p>
+                    <p th:text="${session.msg}"></p>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -79,7 +76,9 @@
             </div>
         </div>
     </div>
-    <script>
+    <!-- 타임리프 문서에서 session 을 삭제할 수 없다. -->
+    <script th:inline="javascript">
+        /*  session.removeAttribute("msg")  // 원래는 됬는데 버전이 바뀌면서 안되는거(타임리프에서 세션객체 삭제(사용후 지우기)할수없다)*/
         const actionModal=document.getElementById("actionModal");
         // 부트스트랩 객체 생성시 모달창 띄우기( show() )
         new bootstrap.Modal(actionModal).show();

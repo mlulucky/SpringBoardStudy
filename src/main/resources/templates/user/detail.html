@@ -1,16 +1,24 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
-<head>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head> <!---head 있어도 없어도 상관없음 -->
     <meta charset="UTF-8">
     <title>유저상세</title>
 </head>
-<body>
-    <header th:include="/headerNav.html"></header>
-    <h1>유저 상세 페이지</h1>
-    <main class="container">
+
+    <div layout:fragment="content">
         <h1 class="my-4">유저 상세 페이지</h1>
         <p th:text="${user}"></p>
-    </main>
+
+        <p>
+            <!-- http://localhost:8080/user/user01/update.do -->
+            <a th:href="@{'/user/{uId}/modify.do'(uId=${user.getUId()})}">수정페이지</a>
+        </p>
+
+    </div>
+
 
 <!--    <header th:include="headerNav.html"></header>-->
 <!--    <main class="container mx-auto" style="width: 450px;">-->
@@ -26,6 +34,5 @@
 <!--        <p>주소상세 <strong th:text="${user.detailAddress}"></strong></p>-->
 <!--        <p>등급(상태) <strong th:text="${user.permission}"></strong></p>-->
 <!--        <a class="btn btn-outline-primary" th:href="@{'/user/{uId}/update.do'(uId=${user.getUId()})}">수정폼</a>-->
-    </main>
-</body>
+<!--    </main>-->
 </html>

@@ -1,18 +1,15 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
 <head>
-    <meta charset="UTF-8">
     <title>Title</title>
 </head>
 <!--  🍏확장자가 html 이고, html 처럼 보이지만 tymeleaf 동적페이지(서버사이드)
       태그의 속성으로 th 가 있으면 실행 후 렌더링 (타임리프 - 속성으로 동작한다)
       xmlns:th="" 타임리프 자동완성
 -->
-<body>
-    <!-- th include 로 html 불러오기 -->
-  <header th:include="/headerNav"></header> <!-- .html 생략가능 // "/" 최상위 , loginForm 이 속한 /templates 폴더 경로  -->
-    <main>
-        <div>
+        <div layout:fragment="content">
             <form class="mx-auto" action="/user/login.do" method="post" style="width:450px;">
                 <h1 class="my-4">로그인 폼</h1>
                 <p class="form-floating">
@@ -36,6 +33,5 @@
 
             </form>
         </div>
-    </main>
-</body>
-</html></html>
+
+</html>

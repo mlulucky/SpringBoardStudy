@@ -1,12 +1,16 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <title>spring board</title>
-</head>
-<body>
-<header th:include="headerNav.html"></header>
-<main class="container">
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+                xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+                layout:decorate="~{layout}">
+
+<!--<head>-->
+<!--    <meta charset="UTF-8">-->
+<!--    <title>spring board</title>-->
+<!--</head>-->
+<!--<body>-->
+<!--<header th:include="headerNav.html"></header>-->
+<!--<main class="container">--> <!-- 타임리프 레이아웃으로 적용 -->
+<div layout:fragment="content">
     <h1 class="my-4">Spring Boot (Mybatis)로 댓글 게시판 만들기</h1>
     <h2>maven vs gradle</h2>
 
@@ -131,33 +135,34 @@
     <p>Gradle 과 Maven 같은 빌드 및 자바 라이브러리(jar) 관리 도구에서 클라이언트(js,css) 측 라이브러리를 관리하는 방법</p> <!-- ex) 부트스트랩 -->
 
 
-<!-- 복합객체 맵핑
-     <select id="findAll" resultMap="BoardMap">
-        # SELECT b.*,u.name 'user.name' FROM boards b INNER JOIN users u USING (u_id)
-        #  u.name (users 테이블의 필드)를 resultMap 의 BoardMap 의 필드 user(유저정보)의 필드 name -> user.name 으로 맵핑할수있다.
-    </select>
--->
-<!--
-     🍎조인 대신 association, collection 맵핑을 하는 이유
-     1. 쿼리의 재사용이 좋다. 쿼리가 간단하다
-     2. 지연로딩을 할 수 있다. 매번 조회하는게 아니라 조회하고 싶을때만 조회
+    <!-- 복합객체 맵핑
+         <select id="findAll" resultMap="BoardMap">
+            # SELECT b.*,u.name 'user.name' FROM boards b INNER JOIN users u USING (u_id)
+            #  u.name (users 테이블의 필드)를 resultMap 의 BoardMap 의 필드 user(유저정보)의 필드 name -> user.name 으로 맵핑할수있다.
+        </select>
+    -->
+    <!--
+         🍎조인 대신 association, collection 맵핑을 하는 이유
+         1. 쿼리의 재사용이 좋다. 쿼리가 간단하다
+         2. 지연로딩을 할 수 있다. 매번 조회하는게 아니라 조회하고 싶을때만 조회
 
-     🍎mybatis 는 뷰(view - html)를 감시한다
-     뷰에서 association 한 join 한 데이터를 사용하는지 안하는지를 감시하고 있다가 association sql 쿼리를 실행한다.
+         🍎mybatis 는 뷰(view - html)를 감시한다
+         뷰에서 association 한 join 한 데이터를 사용하는지 안하는지를 감시하고 있다가 association sql 쿼리를 실행한다.
 
-     mybatis 가 association 한 join 한 데이터 호출(출력)하는지 감시를 하다가
-     호출(출력)을 안하면 association 을 조회(출력)에서 제외,
-     호출(출력)을 하면 association 을 실행 및 조회(출력) => 🍏지연로딩(lazy)
+         mybatis 가 association 한 join 한 데이터 호출(출력)하는지 감시를 하다가
+         호출(출력)을 안하면 association 을 조회(출력)에서 제외,
+         호출(출력)을 하면 association 을 실행 및 조회(출력) => 🍏지연로딩(lazy)
 
-     호출에 상관없이 무조건 association 실행 및 데이터 호출 => 🍏즉시로딩(eager)
+         호출에 상관없이 무조건 association 실행 및 데이터 호출 => 🍏즉시로딩(eager)
 
-     🍎지연로딩의 장점
-     데이터를 덜 조회하니까 => 비용이 절감,
-     매번 가져오지 않으니까 => 속도가 빠르다
+         🍎지연로딩의 장점
+         데이터를 덜 조회하니까 => 비용이 절감,
+         매번 가져오지 않으니까 => 속도가 빠르다
 
-   -->
+       -->
+</div>
 
 
-</main>
-</body>
+<!--</main>-->
+<!--</body>-->
 </html>
