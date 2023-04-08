@@ -1,6 +1,18 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="com.acorn.springboardstudy.mapper.BoardLikeMapper">
+    <resultMap id="LikeStatusCntMap" type="LikeStatusCntDto">
+        <result property="like" column="like"/>
+        <result property="bad" column="bad"/>
+        <result property="best" column="best"/>
+        <result property="sad" column="sad"/>
+        <result property="id" column="b_id"/>
+        <!--  로그인한 사람이 좋아요한 상태를 확인할수있다. -->
+        <association property="status"
+                    select="findByBIdAndUIdIsLoginUserId"
+                    column="b_id"
+                    fetchType="eager"/>
+    </resultMap>
     <resultMap id="BoardLikeMap" type="BoardLikeDto">
         <id property="blId" column="bl_id"/>
         <result property="bId" column="b_id"/>
@@ -18,29 +30,42 @@
     <delete id="deleteOne">
         DELETE FROM board_likes WHERE u_id=#{uId} AND b_id=#{bId}
     </delete>
-    <select id="countStatusByBId" resultType="LikeStatusCntDto">
+    <select id="countStatusByBId" resultMap="LikeStatusCntMap">
         SELECT
             COUNT(CASE WHEN status='LIKE' THEN 1 END) as 'like',
             COUNT(CASE WHEN status='SAD' THEN 1 END) as 'sad',
             COUNT(CASE WHEN status='BEST' THEN 1 END) as 'best',
-            COUNT(CASE WHEN status='BAD' THEN 1 END) as 'bad'
-            FROM board_likes
+            COUNT(CASE WHEN status='BAD' THEN 1 END) as 'bad',
+            bl.b_id
+            FROM board_likes bl
             WHERE b_id=#{bId}
             # 조회결과 (like=1, sad=0, bad=1, best=0)
     </select>
-    <select id="countStatusByUId" resultType="LikeStatusCntDto">
+    <select id="countStatusByUId" resultMap="LikeStatusCntMap">
         SELECT
             COUNT(CASE WHEN status='LIKE' THEN 1 END) as 'like',
             COUNT(CASE WHEN status='SAD' THEN 1 END) as 'sad',
             COUNT(CASE WHEN status='BEST' THEN 1 END) as 'best',
-            COUNT(CASE WHEN status='BAD' THEN 1 END) as 'bad'
-        FROM board_likes
+            COUNT(CASE WHEN status='BAD' THEN 1 END) as 'bad',
+            bl.b_id
+        FROM board_likes bl
         WHERE u_id=#{uId}
     </select>
+    <!-- 해당게시글에 유저가 좋아요를 했는지 물어볼 수 있다. 유저가 이 게시글에 좋아요를 한 내역
+        uId 를 파라미터로 쓸수가 없다 => db 의 변수 등록을 하자
+    -->
     <select id="findByBIdAndUId" resultMap="BoardLikeMap">
         SELECT * FROM board_likes WHERE b_id=#{bId} AND u_id=#{uId}
         # 유저가 게시글에 좋아요를 했는지 확인 체크하는 쿼리 (좋아요 중복x)
         # 여기는 디비! 저건 쿼리문! b_id 는 테이블의 컬럼명 , bId 는 Dto 의 필드명이자 파라미터의 이름이다!(왜? 파라미터로 쓰이기때문에)
     </select>
+
+    <select id="findByBIdAndUIdIsLoginUserId" resultType="String"> <!-- 반환하는 타입이 string 이라서 -->
+        # 로그인 유저를 파라미터로 안받고 변수로 받는다. => 지연로딩 할 수 있다.
+        SELECT status FROM board_likes WHERE b_id=#{bId} AND u_id=@loginUserId
+    </select>
+
+
+
 
 </mapper>

@@ -2,6 +2,7 @@ package com.acorn.springboardstudy.service;
 
 import com.acorn.springboardstudy.dto.BoardDto;
 import com.acorn.springboardstudy.mapper.BoardMapper;
+import com.acorn.springboardstudy.mapper.UserMapper;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -12,10 +13,23 @@ import java.util.List;
 @AllArgsConstructor // 의존성 주입 + 생성자 생성
 public class BoardServiceImp implements BoardService {
     private BoardMapper boardMapper; // @AllArgsConstructor
+    private UserMapper userMapper;
 
+    // 로그인 한 사람이 없을때!
     @Override
     public List<BoardDto> list() {
         List<BoardDto> list=boardMapper.findAll();
+        return list;
+    }
+
+    // 로그인 한 사람이 있을때~!
+    @Override
+    public List<BoardDto> list(String loginUserId) {
+//        List<BoardDto> list=boardMapper.findAll(loginUserId); // 서브쿼리로 좋아요 불러오기
+        userMapper.setLoginUserId(loginUserId); // 로그인한 유저 아이디를 mysql 서버에 변수로 등록
+        List<BoardDto> list=this.boardMapper.findAll(); // 지연로딩으로 좋아요 불러오기
+        userMapper.setLoginUserIdNull(); // 사용이 끝나서 삭제 // 지연로딩으로 조인이 조금 늦어서 불러오기전에 먼저 삭제를 해서(null 을 만듬) 상태가 자꾸 null 이 됨.
+        // 보드에서 조회할때는 즉시로딩으로 바꾸기
         return list;
     }
 

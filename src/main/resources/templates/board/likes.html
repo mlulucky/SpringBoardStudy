@@ -1,0 +1,39 @@
+<div class="likesCont"> <!-- 툴팁 - 레이아웃파일에 자바스크립트 추가해야함. -->
+  <a href="javascript:void(0)"
+     th:onclick="boardLikeHandler('LIKE',[[${likes.id}]])"
+     class="btn btn-sm btn-light text-danger" data-bs-toggle="tooltip" data-bs-title="좋아요" data-bs-placement="top">
+<!--    클릭하면 bId 를 받는다.-->
+    <!--    좋아요 버튼이니까, 좋아요의 상태를 담는다.-->
+    <!--    javascript:void(0) : 자바스크립트 동작을 막는다.-->
+    <i class="bi fs-4" th:classappend="${#strings.equals(likes.status=='LIKE')?'bi-emoji-heart-eyes-fill':'bi-emoji-heart-eyes' }"></i> <!-- bi : bootstrap icon -->
+    <span th:text="${likes.like}"></span> <!-- 지연로딩으로 불러온다 -->
+  </a>
+  <a href="javascript:void(0)"
+     th:onclick="boardLikeHandler('BEST',[[${likes.id}]])"
+     class="btn btn-sm btn-light text-info" data-bs-toggle="tooltip" data-bs-title="최고야" data-bs-placement="top">
+    <i class="bi fs-4"
+       th:classappend="${#strings.equals(likes.status=='BEST')?'bi-emoji-sunglasses-fill':'bi-emoji-sunglasses' }"
+    ></i>
+    <span th:text="${likes.best}"></span>
+  </a>
+  <a href="javascript:void(0)"
+     th:onclick="boardLikeHandler('BAD',[[${likes.id}]])"
+     class="btn btn-sm btn-light" data-bs-toggle="tooltip" data-bs-title="나빠요" data-bs-placement="top">
+    <i class="bi fs-4"
+       th:classappend="${(likes.status=='BAD')?'bi-emoji-expressionless-fill':'bi-emoji-expressionless' }"
+    ></i>
+    <span th:text="${likes.bad}"></span>
+  </a>
+  <a href="javascript:void(0)"
+     th:onclick="boardLikeHandler('SAD',[[${likes.id}]])"
+     class="btn btn-sm btn-light text-warning" data-bs-toggle="tooltip" data-bs-title="슬퍼요" data-bs-placement="top">
+    <i class="bi fs-4"
+       th:classappend="${(likes.status=='SAD')?'bi-emoji-frown-fill':'bi-emoji-frown' }"
+    ></i>
+    <span th:text="${likes.sad}"></span>
+    <span th:text="${likes.id}"></span>
+<!--    // likes 에 bId 가 없어서 받아와야 한다.-->
+  </a>
+<!--  <span th:text="${b.likes}"></span>-->
+<!--  <span th:text="${b.loginUserLikeStatus}"></span>-->
+</div>

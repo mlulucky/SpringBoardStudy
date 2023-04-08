@@ -19,6 +19,7 @@ import lombok.Data;
 //  FROM board_likes
 //  WHERE b_id=#{bId}
 
+// board_likes and reply_likes
 @Data
 public class LikeStatusCntDto {
     // board_likes 테이블의 상태의 결과만을 따로 테이블로 만든것과 같다. (가상테이블_뷰)
@@ -27,5 +28,8 @@ public class LikeStatusCntDto {
     private int sad;
     private int bad;
     private int best;
+    private  int id; // b_id 또는 br_id
+    private String status; // 로그인한 사람이 누른 좋아요 내역
+
 
 }

@@ -17,6 +17,8 @@ public interface BoardLikeMapper {
 
 //    BoardLikeDto findByBIdAndUId(int bId, String uId); // 테스트할때 파라미터를 못찾아서 @Param 추가를 하니 테스트 통과됨
     BoardLikeDto findByBIdAndUId(@Param("bId") int bId, @Param("uId") String uId); // 테스트할때 파라미터를 못찾아서 @Param 추가를 하니 테스트 통과됨
+    String findByBIdAndUIdIsLoginUserId(@Param("bId") int bId); // 로그인한 유저가 좋아요를 한 내역
+
     LikeStatusCntDto countStatusByBId(int bId); // 게시글번호 필요 => 매개변수// LikeStatusCntDto 타입을 반환.
     LikeStatusCntDto countStatusByUId(String uId);
     int insertOne(BoardLikeDto boardLike);

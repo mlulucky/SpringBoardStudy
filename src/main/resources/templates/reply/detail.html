@@ -5,50 +5,77 @@
      th:classappend="${(session.loginUser!=null  && session.loginUser.uId==r.uId)?'border-bottom':''}"
 
 > <!-- 여백을 사이 공간에 넣겠다. -->
-  <div>
-    @<strong th:text="${r.uId}"></strong>
-    <small class="text-muted">•</small>
-    <a th:href="@{'/user/{uId}/follow.do'(uId=${r.uId})}">팔로우</a>
-  </div>
-  <small th:text="${#dates.format(r.updateTime,'yyyy-MM-dd')}"></small>
+    <div>
+        @<strong th:text="${r.uId}"></strong>
+        <small class="text-muted">•</small>
+        <a th:href="@{'/user/{uId}/follow.do'(uId=${r.uId})}">팔로우</a>
+    </div>
+    <small th:text="${#dates.format(r.updateTime,'yyyy-MM-dd')}"></small>
 </div>
-<div class="body p-1">
-  <img th:src="@{'{path}'(path=${r.imgPath})}" alt="댓글이미지">
-  <span th:text="${r.content}"></span>
+<!-- 댓글 이미지 + 내용 -->
+<div class="body p-1 row">
+    <!-- 이미지가 있을때만 이미지 모달창을 띄우겠다. // 이미지 패스는 있는데(공백도 이미지패스로 처리한다 => null 값 넣기)이미지가 없는 경우에도 모달창은 뜬다 -->
+    <div th:if="${r.imgPath!=null}" class="col-4"> <!-- col-1 이렇게 비율을 정하면 그리드 너비 col-12 에서 1로 되버린다. -->
+        <!--    th: 타임리프 속성을 만들면서 타임리프가 실행을 시킨다. // th:id imgModal'+${r.brId} 모달창 실행 -->
+        <a href="#" role="button" th:data-bs-target="'#imgModal'+${r.brId}" data-bs-toggle="modal">
+            <!-- 이미지 비율이 깨지는게 싫으면 object-fit:cover // w-100 : 너비 100%-->
+            <img class="img-thumbnail w-100" style="max-height: 100px; object-fit: cover"
+                 th:src="@{'{path}'(path=${r.imgPath})}" alt="댓글이미지">
+        </a>
+        <!-- 유일한 선택자를 만들기 위해서 id 에 변수를 붙인다. -->
+        <div th:id="'imgModal'+${r.brId}" class="modal" tabindex="-1">
+            <div class="modal-dialog modal-dialog-centered"> <!-- modal-dialog-centered : 모달이 화면 중앙에 위치 -->
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Modal title</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <img class="img-thumbnail w-100" th:src="@{'{path}'(path=${r.imgPath})}" alt="댓글이미지">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col"> <!-- col 은 나머지 / col,col 은 반반 비율 -->
+        <span th:text="${r.content}"></span>
+    </div>
 </div>
+
 <div class="footer d-flex justify-content-between align-items-center">
-  <div class="likesCont"> <!-- 툴팁 - 레이아웃파일에 자바스크립트 추가해야함. -->
-    <a href="#" class="btn btn-sm btn-link" data-bs-toggle="tooltip" data-bs-title="좋아요" data-bs-placement="top">
-      <i class="bi bi-emoji-heart-eyes text-danger fs-4"></i> <!-- bi : bootstrap icon -->
-      <span th:text="${r.likes.like}"></span> <!-- 지연로딩으로 불러온다 -->
-    </a>
-    <a href="#" class="btn btn-sm btn-link" data-bs-toggle="tooltip" data-bs-title="최고야" data-bs-placement="top">
-      <i class="bi bi-emoji-sunglasses fs-4"></i>
-      <span th:text="${r.likes.best}"></span>
-    </a>
-    <a href="#" class="btn btn-sm btn-link" data-bs-toggle="tooltip" data-bs-title="나빠요" data-bs-placement="top">
-      <i class="bi bi-emoji-expressionless fs-4"></i>
-      <span th:text="${r.likes.bad}"></span>
-    </a>
-    <a href="#" class="btn btn-sm btn-link" data-bs-toggle="tooltip" data-bs-title="슬퍼요" data-bs-placement="top">
-      <i class="bi bi-emoji-frown fs-4"></i>
-      <span th:text="${r.likes.sad}"></span>
-    </a>
-  </div>
-  <div>
-    <a href="javascript:void(0)" th:onclick="replyInsertForm.parentBrId.value=[[${r.brId}]]">댓글 달기</a> <!-- 타임리프 변수를 쓰고 싶으면! th:onclick  --><!-- javascript:void(0) 자바스크립트로 막기. -->
-<!--  로그인유저랑 글쓴이가 같으면 수정폼을 보이게 한다  -->
-    <a href="javascript:void(0)"
-       th:if="${session.loginUser!=null  && session.loginUser.uId==r.uId}"
-       th:onclick="loadModifyReply([[${r.brId}]])"
-       class="ms-2">
-      수정폼
-    </a>
-  </div>
+    <div class="likesCont"> <!-- 툴팁 - 레이아웃파일에 자바스크립트 추가해야함. -->
+        <a href="#" class="btn btn-sm btn-link" data-bs-toggle="tooltip" data-bs-title="좋아요" data-bs-placement="top">
+            <i class="bi bi-emoji-heart-eyes text-danger fs-4"></i> <!-- bi : bootstrap icon -->
+            <span th:text="${r.likes.like}"></span> <!-- 지연로딩으로 불러온다 -->
+        </a>
+        <a href="#" class="btn btn-sm btn-link" data-bs-toggle="tooltip" data-bs-title="최고야" data-bs-placement="top">
+            <i class="bi bi-emoji-sunglasses fs-4"></i>
+            <span th:text="${r.likes.best}"></span>
+        </a>
+        <a href="#" class="btn btn-sm btn-link" data-bs-toggle="tooltip" data-bs-title="나빠요" data-bs-placement="top">
+            <i class="bi bi-emoji-expressionless fs-4"></i>
+            <span th:text="${r.likes.bad}"></span>
+        </a>
+        <a href="#" class="btn btn-sm btn-link" data-bs-toggle="tooltip" data-bs-title="슬퍼요" data-bs-placement="top">
+            <i class="bi bi-emoji-frown fs-4"></i>
+            <span th:text="${r.likes.sad}"></span>
+        </a>
+    </div>
+    <div>
+        <a href="javascript:void(0)" th:onclick="replyInsertForm.parentBrId.value=[[${r.brId}]]">댓글 달기</a>
+        <!-- 타임리프 변수를 쓰고 싶으면! th:onclick  --><!-- javascript:void(0) 자바스크립트로 막기. -->
+        <!--  로그인유저랑 글쓴이가 같으면 수정폼을 보이게 한다  -->
+        <a href="javascript:void(0)"
+           th:if="${session.loginUser!=null  && session.loginUser.uId==r.uId}"
+           th:onclick="loadModifyReply([[${r.brId}]])"
+           class="ms-2">
+            수정폼
+        </a>
+    </div>
 </div>
 <ul class="list-group">
-  <li class="list-group-item" th:each="r : ${r.replies}">
-    <th:block th:include="/reply/detail"></th:block> <!-- 나자신을 다시 호출 -->
-  </li>
+    <li class="list-group-item" th:each="r : ${r.replies}">
+        <th:block th:include="/reply/detail"></th:block> <!-- 나자신을 다시 호출 -->
+    </li>
 </ul>
 </html>

@@ -20,6 +20,15 @@
         <result column="permission" property="permission"/>
         <!--        /> :  비어있는. 열고 닫기-->
     </resultMap>
+    <update id="setLoginUserId">
+        # 변수등록 = 파라미터
+        SET @loginUserId=#{uId}
+    </update>
+    <update id="setLoginUserIdNull">
+        # 변수 지우기
+        SET @loginUserId=NULL;
+    </update>
+
     <insert id="insertOne" parameterType="UserDto">
         INSERT INTO users (u_id, pw, name, phone, img_path, email, birth, gender, address, detail_address)
         VALUE (#{uId},#{pw},#{name},#{phone},#{imgPath},#{email},#{birth},#{gender},#{address},#{detailAddress})

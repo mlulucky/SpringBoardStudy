@@ -24,6 +24,7 @@ public interface BoardMapper {
     // 🍏함수를 호출. 실행하면 Mapper.xml 의 sql 쿼리 문이 실행되고
     // resultMap(resultType)맵핑된 결과가 나온다.
     List<BoardDto> findAll();
+    List<BoardDto> findAll(String loginUserId); // 다이나믹 쿼리 실행
     BoardDto findByBId(int bId);
     int insertOne(BoardDto board);
     int updateOne(BoardDto board);

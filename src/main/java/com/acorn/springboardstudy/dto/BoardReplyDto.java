@@ -1,15 +1,24 @@
 package com.acorn.springboardstudy.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
 import java.util.Date;
 import java.util.List;
 
 @Data
+@JsonIgnoreProperties({"handler"}) // => 프록시 객체에 있는 handler 를 제외해라
+// => 왜 제외해야하나?
+// 핸들러는 직렬화가 안되서 반환을 못한다.
+// 핸들러를 제외하고 아래에 Dto 에 정의된 get/set 만 dto 로 반환하겠다.
+
 // Table board_replies
 public class BoardReplyDto {
     private int brId; // pk generate key(==Auto increment) 일반적인 키 // NOT NULL
+    @JsonProperty("bId")// 대문자가 한글자 앞에 있어서 json 이 대소문자 인식을 못해서
     private int bId; // fk boards.b_id // NOT NULL
+    @JsonProperty("uId")
     private String uId; // fk users.u_id // NOT NULL
     private Integer parentBrId; // 기본형은 null 이 될수 없다 => Integer 자료형으로 바꾸기(Null 사용가능)  ISNULL(Null 허용) // 나 자신을 참조 // self join fk board_replies.br_id
     // NULL 이 될 수 있는 경우에만 주의! (NOT NULL - NULL 이 될수없는 경우는 NULL 처리 할 필요 없다.)

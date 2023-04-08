@@ -9,6 +9,7 @@
 </head>
 <div layout:fragment="content">
     <h1 class="my-4">게시판 리스트</h1>
+    <script src="/public/js/BoardLike.js" defer></script>
 <!--    <p th:text="${boards}"></p>--> <!-- 게시글 불러와지는지 체크 (컨트롤러에서 boards 객체를 보냄)-->
     <section id="boardListCont" class="row row-cols-lg-2 row-cols-1 g-5"> <!-- g : 요소간의 간격 --> <!-- md 사이즈일때만, 그리드의 비율을 3개로 / row-cols-1 : 스몰사이즈일때 -->
         <div class="col" th:each="b:${boards}">
@@ -69,24 +70,9 @@
                 </div> <!-- // 카드 body : 이미지, 제목, 내용 -->
 
                 <div class="card-footer  d-flex align-items-center">
-                    <div class="likesCont"> <!-- 툴팁 - 레이아웃파일에 자바스크립트 추가해야함. -->
-                        <a href="#" class="btn btn-sm btn-link" data-bs-toggle="tooltip" data-bs-title="좋아요" data-bs-placement="top">
-                            <i class="bi bi-emoji-heart-eyes text-danger fs-4"></i> <!-- bi : bootstrap icon -->
-                            <span th:text="${b.likes.like}"></span> <!-- 지연로딩으로 불러온다 -->
-                        </a>
-                        <a href="#" class="btn btn-sm btn-link" data-bs-toggle="tooltip" data-bs-title="최고야" data-bs-placement="top">
-                            <i class="bi bi-emoji-sunglasses fs-4"></i>
-                            <span th:text="${b.likes.best}"></span>
-                        </a>
-                        <a href="#" class="btn btn-sm btn-link" data-bs-toggle="tooltip" data-bs-title="나빠요" data-bs-placement="top">
-                            <i class="bi bi-emoji-expressionless fs-4"></i>
-                            <span th:text="${b.likes.bad}"></span>
-                        </a>
-                        <a href="#" class="btn btn-sm btn-link" data-bs-toggle="tooltip" data-bs-title="슬퍼요" data-bs-placement="top">
-                            <i class="bi bi-emoji-frown fs-4"></i>
-                            <span th:text="${b.likes.sad}"></span>
-                        </a>
-                    </div>
+                    <!-- likes 를 따로빼서 재활용할 수 있다. -->
+                    <!-- th:with= 해당 블럭 하위에서 likes 라는 지역 변수등록 (전역변수는 불가) -->
+                    <th:block th:with="likes=${b.likes}" th:include="/board/likes"></th:block>
                     <small class="text-muted">•</small>
                     <div class="viewCont ms-2"  data-bs-toggle="tooltip" data-bs-title="조회수" data-bs-placement="top">
                         <i class="bi bi-eye fs-4"></i>

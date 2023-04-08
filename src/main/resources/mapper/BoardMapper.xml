@@ -10,10 +10,16 @@
         <result column="update_time" property="updateTime"/>
         <result column="status" property="status"/>
         <result column="view_count" property="viewCount"/>
+        <result column="login_user_like_status" property="loginUserLikeStatus"/> <!-- 유저가 좋아요한 내역 -->
+        <!-- column : 조회 결과의 테이블 한줄의 내역 (테이블의 로우(튜플) 중의 내역) // 파라미터를 전달할 수 없다.  -->
+<!--        <association property="loginUserLike"-->
+<!--                    select="com.acorn.springboardstudy.mapper.BoardLikeMapper.findByBIdAndUId"-->
+<!--                     column="b_id,u_id">--> <!-- u_id 를 전달할수없다!! -->
+<!--        </association>-->
         <association property="likes"
                         select="com.acorn.springboardstudy.mapper.BoardLikeMapper.countStatusByBId"
                         column="b_id"
-                        fetchType="lazy"/>
+                        fetchType="eager"/>
         <association property="user"
                     select="com.acorn.springboardstudy.mapper.UserMapper.findByUId"
                     column="u_id"
@@ -102,9 +108,14 @@
     </delete>
 
 
-    <!-- SELECT 문 -->
+    <!-- 보드_게시글_리스트 // SELECT 문 // 보드맵에서 보드리스트를 가져올때 -->
     <select id="findAll" resultMap="BoardMap">
-        SELECT * FROM boards
+        <!-- 모든데이터베이스는 변수를 등록할수있다 => loginUserId 파라미터로 사용하는게 아니라 변수로 스기 -->
+        SELECT *,
+        <if test="#{loginUserId!=null}"> <!-- 유저가 로그인한 경우 // 로그인한 유저가 null 이 아닌경우 다이나믹 쿼리 -->
+               (SELECT status FROM board_likes WHERE b_id=boards.b_id AND u_id=#{loginUserId})  login_user_like_status
+        </if>
+        FROM boards
 
         # 복합객체맵핑
         # SELECT b.*,u.name 'user.name' FROM boards b INNER JOIN users u USING (u_id)

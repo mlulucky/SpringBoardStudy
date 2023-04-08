@@ -22,8 +22,12 @@ spring:
       # 컨트롤러에서 멀티파트 파일을 받을 수 있다.
 img:
   upload:
-    path:  ${user.dir}/SpringBoardStudy/src/main/resources/static/public/img
+    path: ${user.dir}/SpringBoardStudy/src/main/resources/static/public/img
     # 실제로 파일을 쓸곳, 지정설정
+static:
+  path: ${user.dir}/SpringBoardStudy/src/main/resources/static
+    # 삭제할때 쓰려는 이미지
+
 
 
 

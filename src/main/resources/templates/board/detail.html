@@ -162,9 +162,9 @@
         <div id="replyModifyModal" class="modal" tabindex="-1">
             <div class="modal-dialog">
                 <form class="modal-content" name="replyModifyForm" method="post" enctype="multipart/form-data">
-                    <input type="text" name="bId"> <!-- 게시글아이디 받기 -->
-                    <input type="text" name="brId">
-                    <input type="text" name="imgPath">
+                    <input type="hidden" name="bId"> <!-- 게시글아이디 받기 -->
+                    <input type="hidden" name="brId">
+                    <input type="hidden" name="imgPath"> <!-- hidden 타입 : 숨겨서 서버(요청메세지 본문)에 전달 -->
                     <div class="modal-header">
                         <h5 class="modal-title">리플 수정폼</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -175,7 +175,7 @@
                             <label>글쓴이</label>
                         </p>
                         <p>
-                            <img name="imgPath" src="" alt="댓글 이미지"> <!-- 원본 이미지 -->
+                            <img name="imgPath" class="img-thumbnail" src="" alt="댓글 이미지"> <!-- 원본 이미지 -->
                         </p>
                         <p class="form-floating">
                             <input type="text" name="parentBrId" readonly class="form-control" placeholder="참조하는 부모 댓글">
@@ -189,8 +189,9 @@
                             <label>내용</label>
                         </p>
                     </div>
+                    <!-- 모달창 버튼 / 수정 삭제버튼만 있다. ( 초기화는 서버사이드렌더로 값을 가져와야 초기화가 가능하다. 여기서는 안됨)-->
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button id="removeReplyBtn" type="button" class="btn btn-danger">삭제</button>
                         <button type="submit" class="btn btn-primary">수정</button>
                     </div>
                 </form>
@@ -199,21 +200,70 @@
 
     </section>
     <script th:inline="javascript">
-        const replyModifyModal=new bootstrap.Modal(document.getElementById("replyModifyModal"),{});
+        const replyModifyModal=new bootstrap.Modal(document.getElementById("replyModifyModal"),{}); // {} 이게 뭐지?
         const replyCont=document.getElementById("replyCont");
-        const replyInsertForm=document.forms["replyInsertForm"]
-        const replyModifyForm=document.forms["replyModifyForm"]
+        const removeReplyBtn=document.getElementById("removeReplyBtn");
+        const replyInsertForm=document.forms["replyInsertForm"];
+        const replyModifyForm=document.forms["replyModifyForm"];
+        replyModifyForm.onsubmit=modifyReply;
+        removeReplyBtn.addEventListener("click", removeReply); // click 이벤트가 발생하면 ~ 를 실행
+
+        async function removeReply(){
+            let c=confirm("삭제 하시겠습니까?"); // 확인 : true // 취소 : false
+            // console.log(c);
+            let url="/reply/handler.do";
+            let data=new FormData(replyModifyForm);
+            if(c){
+                const resp=await fetch(url,{method:"DELETE",body:data}); // DELETE 요청이 오면
+                if(resp.status===200){
+                    const json=await resp.json(); // 프라미스 객체는 await 를 실행해야 된다.
+                    if(json.remove>0){
+                        alert("삭제성공");
+                        loadReplies(replyModifyForm.bId.value); // 새로고침
+                    }else{
+                        alert("삭제 실패 (삭제된 레코드)");
+                    }
+                }else { // 오류발생
+                    alert("삭제실패 status: " + resp.status);
+                }
+            }
+            replyModifyModal.hide(); // 모달창 숨기기
+        }
+
+        async function modifyReply(e){ // e : 이벤트 정보를 받는다.
+            e.preventDefault(); // 수정버튼 제출 이벤트(onsubmit) 막기
+            replyModifyModal.hide(); // 수정 모달창 숨시기
+            let url="/reply/handler.do";
+            const data=new FormData(replyModifyForm); // FormData : 데이터를 파라미터로 만들기위해 직렬화를 한다.
+            // method GET,POST
+            // RESTAPI(ajax) PUT, DELETE, PATCH ... 호출하는데 restapi 이고 ajax 로만 생성된다.
+            // => url 을 계속 바꾸는게 아니라 메소드만 바꿔서 url 의 상태를 바꿀 수 있다.
+            const resp=await fetch(url,{method:"PUT", body:data}); // PUT : 수정한다(==POST) / body : url 요청할때 파라미터 정보가 들어가는 요청본문(요청헤더 - 주요정보가 들어가는)
+            if(resp.status===200){
+                const json=await resp.json();
+                if(json.modify>0){ // 댓글 수정 성공시
+                    alert("수정 성공");
+                    loadReplies(replyModifyForm.bId.value); // 화면 리로드 // bId 의 value 로 리로드를 하겠다.
+                }
+
+            }else{
+                alert("수정실패 status:"+resp.status); // 🍉405 에러 : url 은 있는데 메소드("PUT")가 없는 에러
+            }
+        }
+
+
         // 자바스크립트에서 타임리프 변수 사용하려면 대괄호 2개
         async function loadReplies(bId){
             let url=`/reply/${bId}/list.do`
             const resp=await fetch(url); // url 페이지 불러오기 (ReplyController 에 있는 동적페이지 - /reply/list html 렌더 반환 )
             if(resp.status==200){
-                alert("댓글 리스트 로드 성공");
-                let text=await resp.text(); // html 을 텍스트로 가져옴.
-                replyCont.innerHTML="";
-                setTimeout(()=>{
-                    replyCont.innerHTML="<h1>리로드</h1>"+text; // InnerHTML 에 반영
-                },1000);
+                // alert("댓글 리스트 로드 성공");
+                let text=await resp.text(); // html 을 텍스트로 가져옴 // 서버에서 통신하여 값을 가져올때는 모두 문자열
+                replyCont.innerHTML=text; // InnerHTML 에 반영
+                // replyCont.innerHTML="";
+                // setTimeout(()=>{
+                //     replyCont.innerHTML="<h1>리로드</h1>"+text; // InnerHTML 에 반영
+                // },1000);
 
             }
             // console.log(text);
@@ -229,7 +279,7 @@
             let url="/reply/handler.do" // register:1(등록성공), 0(실패)
             const resp=await fetch(url,{method:"POST", body:data});  // => blob 데이터를 파라미터로 저장. 전송
             if(resp.status==200){
-                const json=await resp.json(); // json 으로 불러오기
+                const json=await resp.json(); // json(오브젝트) 으로 불러오기 // 서버에서 통신하여 값을 가져올때는 모두 문자열이고 이걸 json 오브젝트로 파싱한것!
                 if(json.register>0){
                     alert("등록성공");
                     await loadReplies(replyInsertForm.bId.value);
@@ -243,9 +293,24 @@
         async function loadModifyReply(brId){ // 수정폼 버튼 클릭시 실행되는 함수
             // alert(brId); // 기능하는지 테스트
             let url=`/reply/${brId}/detail.do`;
-            const resp=await fetch(url);
+            const resp=await fetch(url); // 호출
             if(resp.status==200){
                 const json=await resp.json();
+                // json : {"brId":117,"parentBrId":116,"postTime":"2023-04-06T19:05:46.000+00:00","updateTime":"2023-04-06T19:05:46.000+00:00","status":"PUBLIC","imgPath":"/public/img/reply/1680807946731_4416.png","content":"안녕","likes":null,"replies":[],"uid":"mlucky","bid":4}
+                // 자바스크립트가 uid, bid 대소문자 구분을 못한다 => BoardReplyDto 에  @JsonProperty("bId") 속성 추가
+                // 이미지가 아니라 input 요소만 찾고 있어서 이미지 파일을 못찾는다.
+                // => replyModifyForm.querySelectorAll("input").forEach((input)=>{
+                replyModifyForm.querySelectorAll("[name]").forEach((input)=>{ // => 🍏이미지태그의 value 에 이미지가 들어온다
+                    let key=input.name;
+                    // 🍉input.value : input type='file' 에는 value 가 없음
+                    // json 의 key 값이 있는것만 대입 (file 이미지 제외)
+                    if(key in json){
+                        if(key==="imgPath"){ // 🍏이미지 input 태그의 value => name 으로 이미지 불러오기
+                            input.src=json[key]; // input 요소
+                        }
+                        input.value=json[key]; // src 요소 // json 에서 키값으로 가져온는것  json[brId] = 117 를 input value 에 대입
+                    }
+                })
                 replyModifyModal.show();
             }else {
                 alert("불러오기 실패 status:" + resp.status);

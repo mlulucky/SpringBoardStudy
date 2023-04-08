@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="com.acorn.springboardstudy.mapper.BoardReplyMapper">
+    <!-- BoardReplyMap : 마이바티스가 생성하는 프록시 객체이다!
+     collection 객체를 생성하기 위해서(지연로딩)때문에 핸들러 필드들이 구현이 된다.
+     => dto 객체가 아니라 프록시 객체가 생성된다.
+     -->
     <resultMap id="BoardReplyMap" type="BoardReplyDto">
         <id property="brId" column="br_id"/>
         <id property="bId" column="b_id"/>
@@ -74,6 +78,7 @@
 
 <!--    ?댓글 수정시 불러올 예정이라 좋아요를 받은 수는 필요없음 -->
 <!--    상세페이지 조회에 사용할 구문-->
+    <!-- Map 으로 프록시 객체가 된다. 왜? 컬렉션을 구현하기 위해서 지연로딩이 되어있어서 // handler 는 직렬화가 안되서 응답을 못한다. -->
     <select id="findByBrId" resultMap="BoardReplyMap">
         SELECT * FROM board_replies WHERE br_id=#{brId}
     # 해당 brId 찾기
