@@ -54,7 +54,7 @@ public class BoardController {
             @ModelAttribute BoardDto board,
             MultipartFile [] imgs){ // 이미지 등록을 안하면 null 값이 들어온다.
         String redirectPage="redirect:/board/register.do";
-        if(!loginUser.getUId().equals(board.getUId())) return redirectPage; // 폼의 글쓴이와 로그인한 사람이 다른 경우
+        if(!loginUser.getUId().equals(board.getUId())) return redirectPage; // 폼의 글쓴이와 로그인한 사람이 다른 경우 // return 문 실행 후 메서드 종료
         log.info(board);
         return  redirectPage;
     }

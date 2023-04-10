@@ -129,6 +129,7 @@ class BoardMapperTest {
         board.setBId(9);
         board.setStatus("REPORT");
         int update=boardMapper.updateStatusByBId(board);
+
         BoardDto updateBoard=boardMapper.findByBId(9);
         System.out.println("updateBoard = " + updateBoard);
         assertEquals(update,1); // 업데이트 성공시 결과 1이면 테스트 성공 (기본값은 오류발생시 try/catch)
