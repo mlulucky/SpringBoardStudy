@@ -3,12 +3,16 @@
       xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{/layout}">
+<!-- 🍉layout:decorate 현재 페이지를 레이아웃으로 꾸미겠다
+        / 컨텍스트는 루트 경로
+        /layout.html 파일을 찾아서 레이아웃으로 사용하겠다.-->
 <head>
     <meta charset="UTF-8">
     <title>게시판 리스트</title>
 </head>
 <div layout:fragment="content">
     <h1 class="my-4">게시판 리스트</h1>
+    <!-- 🍉게시글 좋아요 ajax -->
     <script src="/public/js/BoardLike.js" defer></script>
 <!--    <p th:text="${boards}"></p>--> <!-- 게시글 불러와지는지 체크 (컨트롤러에서 boards 객체를 보냄)-->
     <section id="boardListCont" class="row row-cols-lg-2 row-cols-1 g-5"> <!-- g : 요소간의 간격 --> <!-- md 사이즈일때만, 그리드의 비율을 3개로 / row-cols-1 : 스몰사이즈일때 -->
@@ -72,7 +76,13 @@
                 <div class="card-footer  d-flex align-items-center">
                     <!-- likes 를 따로빼서 재활용할 수 있다. -->
                     <!-- th:with= 해당 블럭 하위에서 likes 라는 지역 변수등록 (전역변수는 불가) -->
-                    <th:block th:with="likes=${b.likes}" th:include="/board/likes"></th:block>
+<!--                    session 에 로그인 유저가 null 이 아니면-->
+<!--                    unless == 타임리프 else (똑같은 조건 ~ 가 아니면) -->
+                    <!-- id 유일한 선택자 : likeCont'+${b.bId} -->
+                    <div class="likeCont" th:id="'likeCont'+${b.bId}"> <!-- 좋아요 상태 불러오기 -> 1. 부모클래스에서 likeCont 가 있는걸 찾는 / 2. 이벤트 발생시 id 로 찾는 것 -->
+                        <th:block th:if="${session.loginUser!=null}" th:with="likes=${b.likes}, id=${b.bId}" th:include="/board/loginLikes"></th:block> <!-- 로그인 했을때 -->
+                        <th:block th:unless="${session.loginUser!=null}" th:with="likes=${b.likes}, id=${b.bId}" th:include="/board/likes"></th:block> <!-- 로그인 안했을때 -->
+                    </div>
                     <small class="text-muted">•</small>
                     <div class="viewCont ms-2"  data-bs-toggle="tooltip" data-bs-title="조회수" data-bs-placement="top">
                         <i class="bi bi-eye fs-4"></i>

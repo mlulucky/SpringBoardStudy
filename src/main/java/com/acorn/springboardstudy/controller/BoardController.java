@@ -4,18 +4,18 @@ import com.acorn.springboardstudy.dto.BoardDto;
 import com.acorn.springboardstudy.dto.UserDto;
 import com.acorn.springboardstudy.service.BoardService;
 import lombok.AllArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.SessionAttribute;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
 @Controller // 컨트롤러 설정
 @RequestMapping("/board") // 동적페이지 경로에 /board 를 붙이는 설정
 @AllArgsConstructor
+@Log4j2
 public class BoardController {
     private BoardService boardService; // DIP(의존성 주입 원칙) : 인터페이스 - 확장성이 좋다.
 
@@ -42,6 +42,21 @@ public class BoardController {
         BoardDto board=boardService.detail(bId); // detail 실행
         model.addAttribute("b",board);
         return "/board/detail";
+    }
+
+    @GetMapping("/register.do")
+    public void registerForm( // void : board 의 register.html 을 찾아서 렌더한다.
+            @SessionAttribute UserDto loginUser){ // 로그인한 사람만 등록을 할 수 있다.
+    }
+    @PostMapping("/register.do")
+    public String registerAction(
+            @SessionAttribute UserDto loginUser, // 글쓴이와 로그인한 사람이 같은지 확인예정
+            @ModelAttribute BoardDto board,
+            MultipartFile [] imgs){ // 이미지 등록을 안하면 null 값이 들어온다.
+        String redirectPage="redirect:/board/register.do";
+        if(!loginUser.getUId().equals(board.getUId())) return redirectPage; // 폼의 글쓴이와 로그인한 사람이 다른 경우
+        log.info(board);
+        return  redirectPage;
     }
 
 }

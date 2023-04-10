@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{/layout}"
+>
+<!-- layout:decorate="~{/layout} layout 에 포함시키겠다.-->
+<head>
+  <meta charset="UTF-8">
+  <title>게시글 등록</title>
+</head>
+<div layout:fragment="content">
+<!--  layout 의 컨텐츠 영역을 이 부분으로 하겠다.-->
+  <form enctype="multipart/form-data" name="registerForm" action="./register.do" method="post" style="width: 500px;margin: 0 auto;">
+    <h1 class="my-4">게시글 등록</h1>
+    <p class="form-floating">
+      <input readonly id="uIdInput" type="text" name="uId" th:value="${session.loginUser.uId}" class="form-control" placeholder="??">
+      <label class="">아이디(글쓴이)</label>
+    </p>
+    <p id="imgCont">
+      <button id="imgAddBtn" class="btn btn-primary w-100" type="button">
+        이미지
+        <i class="bi bi-plus-square"></i>
+      </button>
+    </p>
+
+    <p class="form-floating">
+      <input id="titleInput" type="text" name="title" value="" class="form-control" placeholder="??">
+      <label class="">글제목</label>
+    </p>
+    <p>
+<!-- textarea 는 안에 내용이 들어와야 해서 열고 닫아야 한다. <textarea></textarea> -->
+      <label for="contentInput" class="form-label">글내용</label>
+      <textarea id="contentInput" name="content" value="" rows="4" class="form-control"></textarea>
+    </p>
+    <p class="text-end">
+<!--  등록버튼을 누르면 처리하는 컨트롤러가 필요하다. -->
+      <button type="reset" class="btn btn-warning">초기화</button>
+      <button type="submit" class="btn btn-primary">등록</button>
+    </p>
+  </form>
+  <script>
+    // innerHTML 은 html 을 전체 바꾸는것.
+    // insertBefore / appencChild
+    const imgAddBtn=document.getElementById("imgAddBtn");
+    const imgCont=document.getElementById("imgCont");
+    imgAddBtn.addEventListener("click",(e)=>{
+      imgCont.insertAdjacentHTML("beforeend",imgInputComponent());
+    });
+
+
+    // 컨포넌트를 쓰는 이유 ? 매개변수를 받아서 사용할 수 있다.
+    function imgInputComponent(label="이미지",name="img"){ // html 을 문자열로 가지고 있는 컨포넌트
+      // html 문자열 반환
+      return `<p class="input-group mt-2">
+                <label class="input-group-text">${label}</label>
+                <input class="form-control" type="file" name="${name}">
+                <button type="button" class="btn btn-danger" onclick="this.closest('.input-group').remove()"> <!--- 클래스 이름이 input-group 부모중에 하나만 선택 -->
+                    <i class="bi bi-x-lg"></i> <!-- x 아이콘 -->
+                </button>
+              </p>`
+    }
+  </script>
+
+
+</div>
+</html>

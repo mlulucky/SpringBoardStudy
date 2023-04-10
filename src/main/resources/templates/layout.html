@@ -10,6 +10,7 @@
   <link rel="stylesheet" href="/webjars/bootstrap-icons/1.10.3/font/bootstrap-icons.css"> <!-- 부트스트랩 아이콘 라이브러리 추가 -->
 </head>
 <body>
+
   <header th:replace="/headerNav.html"></header>
   <main class="container">
     <th:block layout:fragment="content"></th:block>
@@ -17,7 +18,7 @@
 
   <script> <!-- 부트스트랩 툴팁 생성 / data-bs-toggle="tooltip" 을 다 찾아서 부트스트랩 툴팁을 정의 (툴팁 동작시 필요)-->
     const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
-    const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
+    const tooltipList = [tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
   </script>
 </body>
 </html>

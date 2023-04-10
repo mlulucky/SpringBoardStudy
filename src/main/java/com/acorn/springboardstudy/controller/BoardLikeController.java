@@ -24,24 +24,29 @@ public class BoardLikeController {
             @PathVariable int bId,
             @SessionAttribute(required = false) UserDto loginUser,
             Model model) {
+        String templatePage;
+//        String templatePage="";
         LikeStatusCntDto likes;
+        model.addAttribute("id",bId); // 뷰에 bId 객체 전달
         if (loginUser != null) {
             likes = boardLikeService.read(bId, loginUser.getUId());
+            templatePage="/board/loginLikes";
         } else { // null 이면
             likes = boardLikeService.read(bId);
+            templatePage="/board/likes";
         }
         // log.info(likes);  // LikeStatusCntDto(like=1, sad=0, bad=1, best=0, status=BAD)
 //        LikeStatusCntDto likes=new LikeStatusCntDto();
         model.addAttribute("likes", likes);
-        return "/board/likes";
+        return templatePage;
+//        return "/board/likes";
     }
 
     @Data
     class HandlerDto {
         // 좋아요 등록,수정,삭제
-        static enum HandlerType {REGISTER, MODIFY, REMOVE}
-
-        private HandlerType handlerType;
+        enum HandlerType {REGISTER, MODIFY, REMOVE}
+        private HandlerType handlerType; // 🔥이건 왜 필요한건가?
         private String status;
         int handler; // 0 실패, 1 성공
     }
@@ -50,13 +55,15 @@ public class BoardLikeController {
     // 1번글 좋아요를 누르면 => /board/like/LIKE/1/handler.do
     // {"handlerType":"MODIFY","status":"LIKE","handler":1}
     // 3번글 슬퍼요를 누르면 => /board/like/SAD/3/handler.do
-    @GetMapping("/{status}/{bId}/handler.do")
+    @GetMapping("/{status}/{bId}/handler.do") // 좋아요싫어요를 bid 몇번 글에 할것인가.
     public @ResponseBody HandlerDto handler(
             @PathVariable String status,
             @PathVariable int bId,
             @SessionAttribute UserDto loginUser) { // 로그인한 사람만 좋아요 등록가능
         HandlerDto handlerDto = new HandlerDto();
         handlerDto.setStatus(status);
+
+        // 로그인 유저가 좋아요했는지 내역을 가져오는 것
         BoardLikeDto boardLike=boardLikeService.detail(bId,loginUser.getUId());
         int handler=0;
         BoardLikeDto like=new BoardLikeDto();
