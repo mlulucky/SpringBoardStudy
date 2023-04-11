@@ -30,43 +30,35 @@
                         <small class="text-muted">•</small>
                         <small th:text="${#dates.format(b.postTime,'yyy-MM-dd')}"></small> <!-- date.format(데이트객체, 포맷) 으로 날짜 예쁘게 수정하기 -->  <!-- b.postTime 자바객체 : Tue Mar 28 11:34:12 KST 2023 -->
                     </div>
-                    <div class="dropdown">
-                        <a href="#" role="button" class="" data-bs-toggle="dropdown"> <!-- a태그 버튼으로 역할주기 -->
-                            <i class="bi bi-three-dots fs-4"></i> <!-- fs : font-size --> <!-- 웹자르 라이브러리는 추가후에 서버를 껏다 켜야 적용이 된다. -->
-                        </a>
-                        <ul class="dropdown-menu">
-                            <li>
-                                <a class="dropdown-item" th:href="@{'/board/{bId}/detail.do'(bId=${b.bId})}">글 상세</a>
-                            </li>
-                            <li><a class="dropdown-item" href="#">글쓴이가 작성한 글목록</a></li>
-                            <li><a class="dropdown-item" href="#">계정 정보</a></li>
-                            <li>
-                                <a class="dropdown-item text-danger" href="#">
-                                    <i class="bi bi-bell"></i>
-                                    신고
-                                </a>
-                            </li>
-                        </ul>
-                    </div>
+<!--                    드롭다운 메뉴-->
+                    <th:block th:include="/board/dropDownMenu.html"></th:block>
                 </div> <!-- // 카드 header : 아이디, 이름, 작성일, 더보기 버튼 -->
                 <div class="card-body">
                     <!-- 이미지 -->
-                    <div id="carouselExampleControls" class="carousel slide" data-bs-ride="carousel">
+<!--                    b.imgs 가 null 이 아닐때만 출력-->
+                    <div th:if="${b.imgs!=null}" th:id="'carousel'+${b.bId}" class="carousel slide" data-bs-ride="carousel">
                         <div class="carousel-inner">
-                            <div class="carousel-item active">
-                                <img src="/public/img/board/춘식이라이언.jpg" class="d-block w-100" alt="게시글 이미지">
+<!--                            🍉 글쓴이가 쓴글은 수정하기 버튼 보이게 하기!-->
+<!--                           th:classappend="${state.first}?'active':'' =>  이미지가 첫번째이면 active 클래스를 주고 아니면 아무것도 안준다.-->
+                            <div class="carousel-item" th:each="img,state : ${b.imgs}" th:classappend="${state.first}?'active':''">
+                                <img th:src="@{'{path}'(path=${img.imgPath})}" class="d-block w-100" alt="게시글 이미지">
+                                <p th:text="${state}"></p>
                             </div>
+                                <!-- state : 이미지 상태가 있다. -->  <!-- forEach -->
+<!--                            {index = 2, count = 3, size = 3, current = BoardImgDto(biId=34, bId=21, imgPath=/public/img/board/1681175775739_99439.png)   -->
                         </div>
-                        <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleControls" data-bs-slide="prev">
+<!--                        carouselExampleControls 이미지 옆으로 가는 버튼-->
+
+                        <button class="carousel-control-prev" type="button" th:data-bs-target="'#carousel'+${b.bId}" data-bs-slide="prev">
+<!--                        <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleControls" data-bs-slide="prev">-->
                             <span class="carousel-control-prev-icon" aria-hidden="true"></span>
                             <span class="visually-hidden">Previous</span>
                         </button>
-                        <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleControls" data-bs-slide="next">
+                        <button class="carousel-control-next" type="button" th:data-bs-target="'#carousel'+${b.bId}" data-bs-slide="next">
                             <span class="carousel-control-next-icon" aria-hidden="true"></span>
                             <span class="visually-hidden">Next</span>
                         </button>
                     </div> <!-- // 이미지 -->
-
                     <div>
                         <h5 class="card-title" th:text="${b.title}"></h5>
                         <p class="card-text" th:text="${b.content}"></p>

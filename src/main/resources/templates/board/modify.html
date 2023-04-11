@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{/layout}"
+>
+<!-- layout:decorate="~{/layout} layout 에 포함시키겠다.-->
+<head>
+  <meta charset="UTF-8">
+  <title>게시글 수정</title>
+  <style>
+    /* 이미지 클릭시 이미지 배경색 스타일주기 */
+    .delImgItem .delImgInput {
+      /*#imgDelCont [name=delImgId] { /* 자손 중에 이름이 delImgId */
+      /*display: none; !* 체크박스 안보이게 감추기 *!*/
+    }
+    .delImgItem > .delImgInput:checked + img{  /* : 실제로 존재하지는 않는, 상태를 의미 */
+      /*#imgDelCont [name=delImgId]:checked + img{ !*  체크가 되면 근접한 img 태그 *!*/
+      background-color: red;
+    }
+  </style>
+</head>
+<div layout:fragment="content">
+<!--  layout 의 컨텐츠 영역을 이 부분으로 하겠다.-->
+  <form enctype="multipart/form-data" name="registerForm" action="/board/modify.do" method="post" style="width: 500px;margin: 0 auto;">
+    <input type="hidden" th:value="${b.bId}" name="bId">
+    <h1 class="my-4">게시글 수정</h1>
+    <p class="form-floating">
+      <input readonly id="uIdInput" type="text" name="uId" th:value="${b.uId}" class="form-control" placeholder="??">
+      <label class="">아이디(글쓴이)</label>
+    </p>
+
+    <p id="imgDelCont">
+      <h4>이미지삭제 (체크)</h4>
+<!--      타임리프 반복문 th:each // 자동으로 null 체크를 해준다 -->
+<!--     img 는 반복, state 는 상태-->
+      <label th:each="img, state:${b.imgs}" class="w-25 delImgItem"> <!-- 이미지 너비 비율 주기 w-25 -->
+<!--      🍉 이미지의 biId 가 있으면 삭제, 없으면 이미지 등록--> <!-- 🍉이미지는 배열이라서!! // state.index : 이미지의 상태 인덱스번호  => 파라미터 BoardDto board 로 정보를 받는다. -->
+<!--        <input type="checkbox" class="delImgInput" th:name="'imgs['+${state.index}+'].biId'" th:value="${img.biId}">-->
+<!--        <input type="checkbox" class="delImgInput" name="imgs[0].biId" th:value="${img.biId}">-->
+<!--        name => imgs[0].biId // => 컨트롤러 board.getImgs()) // => : [BoardImgDto(biId=33, bId=0, imgPath=null)]-->
+        <input type="checkbox" class="delImgInput" name="delImgId" th:value="${img.biId}">
+        <img th:src="@{'{path}'(path=${img.imgPath})}" class="img-thumbnail">
+      </label>
+    </p>
+    <p id="imgCont">
+      <button id="imgAddBtn" class="btn btn-primary w-100" type="button">
+        New 이미지
+        <i class="bi bi-plus-square"></i>
+      </button>
+    </p>
+
+    <p class="form-floating">
+      <input id="titleInput" type="text" name="title" th:value="${b.title}" class="form-control" placeholder="??">
+      <label class="">글제목</label>
+    </p>
+    <p>
+        <!--    textarea 는 안에 내용이 들어와야 해서 열고 닫아야 한다. <textarea></textarea>
+                value 가 없다. 태그 안에 들어가는 게 value 이다. => textarea 의 value ==> th:text
+        -->
+      <label for="contentInput" class="form-label">글내용</label>
+      <textarea id="contentInput" name="content" rows="4" class="form-control" th:text="${b.content}"></textarea>
+    </p>
+    <p class="text-end">
+<!--  등록버튼을 누르면 처리하는 컨트롤러가 필요하다. -->
+      <button type="reset" class="btn btn-warning">초기화</button>
+      <button type="submit" class="btn btn-primary">수정</button>
+    </p>
+  </form>
+  <script>
+    // innerHTML 은 html 을 전체 바꾸는것.
+    // insertBefore / appencChild
+    const imgAddBtn=document.getElementById("imgAddBtn");
+    const imgCont=document.getElementById("imgCont");
+    imgAddBtn.addEventListener("click",(e)=>{
+      imgCont.insertAdjacentHTML("beforeend",imgInputComponent());
+    });
+
+
+    // 컨포넌트를 쓰는 이유 ? 매개변수를 받아서 사용할 수 있다.
+    function imgInputComponent(label="이미지",name="img"){ // html 을 문자열로 가지고 있는 컨포넌트
+      // html 문자열 반환
+      return `<p class="input-group mt-2">
+                <label class="input-group-text">${label}</label>
+                <input class="form-control" type="file" name="${name}">
+                <button type="button" class="btn btn-danger" onclick="this.closest('.input-group').remove()"> <!--- 클래스 이름이 input-group 부모중에 하나만 선택 -->
+                    <i class="bi bi-x-lg"></i> <!-- x 아이콘 -->
+                </button>
+              </p>`
+    }
+  </script>
+
+
+</div>
+</html>

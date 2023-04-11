@@ -79,6 +79,7 @@
         keyProperty="bId" : 파라미터로 넘어온 BoardDto 에 (keyproperty == boardDto 의 필드명 가 있다.) auto increment 로 생성된 키를 반환하겠다.
     -->
     <!-- 🍎2023.3.29 내 개인적으로 처음에 maven 폴더 만들고 gradle 폴더로 옮기면서, Mapper 인터페이스 연결이 잘 안되서, 파라미터 타입을 전체 경로로 강제 지정함  -->
+    <!-- BoardDto 에서 파라미터로 넘어온 bId 에 자동생성된 값을 담아서 다시 BoardDto 에 -->
     <insert useGeneratedKeys="true" keyProperty="bId" id="insertOne" parameterType="BoardDto">
         INSERT INTO boards (u_id, title, content) VALUE (#{uId},#{title},#{content})
     </insert>

@@ -29,9 +29,11 @@
       <label class="">글제목</label>
     </p>
     <p>
-<!-- textarea 는 안에 내용이 들어와야 해서 열고 닫아야 한다. <textarea></textarea> -->
+        <!--    textarea 는 안에 내용이 들어와야 해서 열고 닫아야 한다. <textarea></textarea>
+                value 가 없다. 태그 안에 들어가는 게 value 이다.
+        -->
       <label for="contentInput" class="form-label">글내용</label>
-      <textarea id="contentInput" name="content" value="" rows="4" class="form-control"></textarea>
+      <textarea id="contentInput" name="content" rows="4" class="form-control"></textarea>
     </p>
     <p class="text-end">
 <!--  등록버튼을 누르면 처리하는 컨트롤러가 필요하다. -->

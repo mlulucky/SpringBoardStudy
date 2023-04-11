@@ -31,7 +31,10 @@ public class IntercepterConfig implements WebMvcConfigurer {
         registry.addInterceptor(loginCheckInterceptor).order(2) // 로그인여부 체크 // 인터셉터 추가 // order : 순서
                 .addPathPatterns("/user/**") // 패턴 추가
                 .excludePathPatterns("/user/login.do") // user 의 login.do 는 제외해라!
-                .excludePathPatterns("/user/signup.do"); // exclude : 제외하다
+                .excludePathPatterns("/user/signup.do") // exclude : 제외하다
+                .addPathPatterns("/board/**")
+                .excludePathPatterns("/board/list.do") // 로그인 제외
+                .excludePathPatterns("/board/*/detail.do"); // 로그인 제외
                 // 로그인과 회원가입을 제외한 모든 페이지에 갈수없다. => 왜? 인터셉터로 막아서
         registry.addInterceptor(msgRemoveInterceptor).order(3) // 로그인 메세지 삭제
                 .addPathPatterns("/**"); // 로그인페이지

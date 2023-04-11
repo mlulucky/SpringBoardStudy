@@ -1,0 +1,23 @@
+<div class="dropdown">
+  <a href="#" role="button" class="" data-bs-toggle="dropdown"> <!-- a태그 버튼으로 역할주기 -->
+    <i class="bi bi-three-dots fs-4"></i> <!-- fs : font-size --> <!-- 웹자르 라이브러리는 추가후에 서버를 껏다 켜야 적용이 된다. -->
+  </a>
+  <ul class="dropdown-menu">
+    <li>
+      <a class="dropdown-item" th:href="@{'/board/{bId}/detail.do'(bId=${b.bId})}">글 상세</a>
+    </li>
+    <!--                            로그인한 사람만 수정폼 보이게-->
+<!--    로그인 안하면 loginUser == null 이 된다 => 에러 발생(null 에 uId 가 없으니까) => null 이 아니라는 조건을 추가하기! -->
+    <li th:if="${session.loginUser!=null && #strings.equals(session.loginUser.uId,b.uId)}">
+      <a class="dropdown-item" th:href="@{'/board/{bId}/modify.do'(bId=${b.bId})}">수정 폼</a>
+    </li>
+    <li><a class="dropdown-item" href="#">글쓴이가 작성한 글목록</a></li>
+    <li><a class="dropdown-item" href="#">계정 정보</a></li>
+    <li>
+      <a class="dropdown-item text-danger" href="#">
+        <i class="bi bi-bell"></i>
+        신고
+      </a>
+    </li>
+  </ul>
+</div>

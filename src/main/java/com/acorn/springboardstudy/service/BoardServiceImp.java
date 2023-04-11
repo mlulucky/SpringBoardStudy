@@ -1,6 +1,8 @@
 package com.acorn.springboardstudy.service;
 
 import com.acorn.springboardstudy.dto.BoardDto;
+import com.acorn.springboardstudy.dto.BoardImgDto;
+import com.acorn.springboardstudy.mapper.BoardImgMapper;
 import com.acorn.springboardstudy.mapper.BoardMapper;
 import com.acorn.springboardstudy.mapper.UserMapper;
 import lombok.AllArgsConstructor;
@@ -14,6 +16,7 @@ import java.util.List;
 public class BoardServiceImp implements BoardService {
     private BoardMapper boardMapper; // @AllArgsConstructor
     private UserMapper userMapper;
+    private BoardImgMapper boardImgMapper; // 🍉보드에서 이미지 등록하기(보드 등록시)
 
     // 로그인 한 사람이 없을때!
     @Override
@@ -47,14 +50,30 @@ public class BoardServiceImp implements BoardService {
     }
 
     @Override
+    @Transactional // 보드 등록시 이미지 등록 -> 실패시 롤백하려고~! 🍋중간에 값이 하나라도 잘못되면 등록이 취소가 된다.
     public int register(BoardDto board) {
-        int register=boardMapper.insertOne(board);
-        return register;
+        // 🍉bId 가 처음에 null
+        int register=0;
+        register=boardMapper.insertOne(board); // 🍉insert 할때 bId 가 생성되고 그 값을 마이바티스가 파라미터인 board 에 전달
+        if(board.getImgs()!=null){
+            for(BoardImgDto img : board.getImgs()){ // 🍉이미지에 게시글 번호를 알수없다 => 이미지에 게시글 번호 정해주기!
+                img.setBId(board.getBId()); // 🍉생성된 bId 를 이미지에 저장
+                register+=boardImgMapper.insertOne(img);
+            }
+        }
+            return register;
     }
 
     @Override
-    public int modify(BoardDto board) {
+    @Transactional // 이중에 하나라도 문제가 되면, 오류가 뜨면 작업을 취소한다.
+    public int modify(BoardDto board, int[] delImgIds) {
         int modify=boardMapper.updateOne(board);
+        if(delImgIds!=null){
+            for(int biId : delImgIds){
+                // 삭제하기 전에 이미지아이디로 이미지 조회해서 이미지 삭제하기
+                modify+=boardImgMapper.deleteOne(biId);
+            }
+        }
         return modify;
     }
 

@@ -50,46 +50,41 @@
                             <strong class="ms-2" th:text="${b.user.uId}"></strong> <!-- margin-start -->
                             (<strong th:text="${b.user.name}"></strong>)
                         </div>
-                        <div class="dropdown">
-                            <a href="#" role="button" class="" data-bs-toggle="dropdown"> <!-- a태그 버튼으로 역할주기 -->
-                                <i class="bi bi-three-dots fs-4"></i> <!-- fs : font-size -->
-                                <!-- 웹자르 라이브러리는 추가후에 서버를 껏다 켜야 적용이 된다. -->
-                            </a>
-                            <ul class="dropdown-menu">
-                                <li>
-                                    <a class="dropdown-item" th:href="@{'/board/{bId}/detail.do'(bId=${b.bId})}">글
-                                        상세</a>
-                                </li>
-                                <li><a class="dropdown-item" href="#">글쓴이가 작성한 글목록</a></li>
-                                <li><a class="dropdown-item" href="#">계정 정보</a></li>
-                                <li>
-                                    <a class="dropdown-item text-danger" href="#">
-                                        <i class="bi bi-bell"></i>
-                                        신고
-                                    </a>
-                                </li>
-                            </ul>
-                        </div>
+<!--                        <div class="dropdown">-->
+<!--                            <a href="#" role="button" class="" data-bs-toggle="dropdown"> &lt;!&ndash; a태그 버튼으로 역할주기 &ndash;&gt;-->
+<!--                                <i class="bi bi-three-dots fs-4"></i> &lt;!&ndash; fs : font-size &ndash;&gt;-->
+<!--                                &lt;!&ndash; 웹자르 라이브러리는 추가후에 서버를 껏다 켜야 적용이 된다. &ndash;&gt;-->
+<!--                            </a>-->
+<!--                        </div>-->
+                        <th:block th:include="/board/dropDownMenu.html"></th:block>
                     </div>
                     <div class="card-body">
-                        <div id="carouselExampleControls" class="carousel slide d-lg-none" data-bs-ride="carousel">
-                            <!-- d-md-none : display md 이상일때 안보이게  -->
+                        <!-- 이미지 -->
+                        <!--                    b.imgs 가 null 이 아닐때만 출력-->
+                        <div th:if="${b.imgs!=null}" th:id="'carousel'+${b.bId}" class="carousel slide" data-bs-ride="carousel">
                             <div class="carousel-inner">
-                                <div class="carousel-item active">
-                                    <img src="/public/img/board/춘식이라이언.jpg" class="d-block w-100" alt="게시글 이미지">
+                                <!--                            🍉 글쓴이가 쓴글은 수정하기 버튼 보이게 하기!-->
+                                <!--                           th:classappend="${state.first}?'active':'' =>  이미지가 첫번째이면 active 클래스를 주고 아니면 아무것도 안준다.-->
+                                <div class="carousel-item" th:each="img,state : ${b.imgs}" th:classappend="${state.first}?'active':''">
+                                    <img th:src="@{'{path}'(path=${img.imgPath})}" class="d-block w-100" alt="게시글 이미지">
+                                    <p th:text="${state}"></p>
                                 </div>
+                                <!-- state : 이미지 상태가 있다. -->  <!-- forEach -->
+                                <!--                            {index = 2, count = 3, size = 3, current = BoardImgDto(biId=34, bId=21, imgPath=/public/img/board/1681175775739_99439.png)   -->
                             </div>
-                            <button class="carousel-control-prev" type="button"
-                                    data-bs-target="#carouselExampleControls" data-bs-slide="prev">
+                            <!--                        carouselExampleControls 이미지 옆으로 가는 버튼-->
+
+                            <button class="carousel-control-prev" type="button" th:data-bs-target="'#carousel'+${b.bId}" data-bs-slide="prev">
+                                <!--                        <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleControls" data-bs-slide="prev">-->
                                 <span class="carousel-control-prev-icon" aria-hidden="true"></span>
                                 <span class="visually-hidden">Previous</span>
                             </button>
-                            <button class="carousel-control-next" type="button"
-                                    data-bs-target="#carouselExampleControls" data-bs-slide="next">
+                            <button class="carousel-control-next" type="button" th:data-bs-target="'#carousel'+${b.bId}" data-bs-slide="next">
                                 <span class="carousel-control-next-icon" aria-hidden="true"></span>
                                 <span class="visually-hidden">Next</span>
                             </button>
-                        </div>
+                        </div> <!-- // 이미지 -->
+
                         <div>
                             <div class="d-flex my-2">
                                 <div class="me-2">
