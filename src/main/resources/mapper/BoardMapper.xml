@@ -111,7 +111,7 @@
 
     <!-- 보드_게시글_리스트 // SELECT 문 // 보드맵에서 보드리스트를 가져올때 -->
     <select id="findAll" resultMap="BoardMap">
-        <!-- 모든데이터베이스는 변수를 등록할수있다 => loginUserId 파라미터로 사용하는게 아니라 변수로 스기 -->
+        <!-- 모든데이터베이스는 변수를 등록할수있다 => loginUserId 파라미터로 사용하는게 아니라 변수로 쓰기 -->
         SELECT *  FROM boards
 
     </select>
