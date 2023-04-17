@@ -22,7 +22,7 @@ public class PageDto {
     private boolean next; // 마지막 페이징버튼에서는 버튼 비활성화 위해
 
     // totalRows 를 셋팅할때 모두 셋팅되게 하기
-    public void setToalRows(int totalRows){ // totalRows 를 셋하면 아래 필드들이 정의가 된다.
+    public void setTotalRows(int totalRows){ // totalRows 를 셋하면 아래 필드들이 정의가 된다.
         this.totalRows=totalRows;
         // 13/5 = 2
         // => 3
