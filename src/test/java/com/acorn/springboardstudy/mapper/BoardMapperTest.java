@@ -1,6 +1,6 @@
 package com.acorn.springboardstudy.mapper;
 import com.acorn.springboardstudy.dto.BoardDto;
-import org.junit.jupiter.api.Assertions;
+import com.acorn.springboardstudy.dto.PageDto;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -26,8 +26,23 @@ class BoardMapperTest {
     // 즉, @Mapper 어노테이션은 SQL 세션 팩토리를 직접적으로 의존하지 않지만, 인터페이스를 구현하는 클래스가 SqlSessionFactory를 사용하여 SQL 세션을 가져와서 데이터베이스와 상호 작용합니다.
 
     @Test
+    void page(){
+        int totalRows=13;
+        int offset=5;
+        double result=((double)totalRows)/offset;
+        System.out.println("result = " + result); // 2.6
+        System.out.println("(Math.ceil(totalRows/offset)) = " + (Math.ceil(((double)totalRows/offset)))); // 3
+        // Math.ceil : 실수 올림
+        // int 정수/정수 => 정수 (정수끼리의 연산은 정수가 나온다)
+        // double 실수/실수 => 실수
+        // 실수 / 정수 => 실수
+        // 실수결과가 나오려면 둘중하나는 실수가 나와야 한다.
+    }
+    
+    @Test
     void findAll() {
-        List<BoardDto> boardList=boardMapper.findAll();
+        PageDto pageDto=new PageDto();
+        List<BoardDto> boardList=boardMapper.findAll(pageDto);
         System.out.println("boardList = " + boardList);
         assertNotNull(boardList); // null 이 아니면 성공! (기본값은 오류발생시 try/catch)
 
@@ -139,6 +154,12 @@ class BoardMapperTest {
     void updateIncrementViewCountBId() { // 조회수 증가
         int updateIncrementViewCountBId = boardMapper.updateIncrementViewCountBId(1);
         assertEquals(updateIncrementViewCountBId,1);
+    }
+
+    @Test
+    void findByTag() {
+        List<BoardDto> boards = boardMapper.findByTag("홍대");
+        assertNotNull(boards);
     }
 
 //    @Test

@@ -32,10 +32,11 @@
                     <span class="visually-hidden">Next</span>
                 </button>
             </div>
+
             <div class="col ps-0"> <!-- card 에 col 을 주면 여백이 생겨서 col, card 따로 주기 -->
                 <!-- 🍏컴퓨터 화면에 보이는 브라우저 크기 : viewport 크기 , 화면에 보이는 높이 : 100vh (100%) -->
                 <div class="card col" style="height: 70vh; overflow-y: auto"> <!-- boards 의 요소만큼을 반복해서 하나씩 배오기 (반복문) -->
-                    <!--                <div class="card col overflow-scroll" style="height: 70vh;"> &lt;!&ndash; boards 의 요소만큼을 반복해서 하나씩 배오기 (반복문) &ndash;&gt;-->
+                    <!--  <div class="card col overflow-scroll" style="height: 70vh;"> &lt;!&ndash; boards 의 요소만큼을 반복해서 하나씩 배오기 (반복문) &ndash;&gt;-->
                     <div class="card-header d-flex justify-content-between align-items-center
                                 bg-light position-sticky top-0" style="z-index: 999">
                         <!-- 오른쪽 끝으로 보내기 / stretch 속성으로 아이콘이 위로 올라간다 => 세로중아 맞추기 align-items-center -->
@@ -67,15 +68,15 @@
                                 <!--                           th:classappend="${state.first}?'active':'' =>  이미지가 첫번째이면 active 클래스를 주고 아니면 아무것도 안준다.-->
                                 <div class="carousel-item" th:each="img,state : ${b.imgs}" th:classappend="${state.first}?'active':''">
                                     <img th:src="@{'{path}'(path=${img.imgPath})}" class="d-block w-100" alt="게시글 이미지">
-                                    <p th:text="${state}"></p>
+<!--                                    <p th:text="${state}"></p>-->
                                 </div>
                                 <!-- state : 이미지 상태가 있다. -->  <!-- forEach -->
-                                <!--                            {index = 2, count = 3, size = 3, current = BoardImgDto(biId=34, bId=21, imgPath=/public/img/board/1681175775739_99439.png)   -->
+                                <!-- {index = 2, count = 3, size = 3, current = BoardImgDto(biId=34, bId=21, imgPath=/public/img/board/1681175775739_99439.png)   -->
                             </div>
-                            <!--                        carouselExampleControls 이미지 옆으로 가는 버튼-->
+                            <!-- carouselExampleControls 이미지 옆으로 가는 버튼-->
 
                             <button class="carousel-control-prev" type="button" th:data-bs-target="'#carousel'+${b.bId}" data-bs-slide="prev">
-                                <!--                        <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleControls" data-bs-slide="prev">-->
+                                <!-- <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleControls" data-bs-slide="prev">-->
                                 <span class="carousel-control-prev-icon" aria-hidden="true"></span>
                                 <span class="visually-hidden">Previous</span>
                             </button>
@@ -98,6 +99,9 @@
                             </div>
                             <h5 class="card-title" th:text="${b.title}"></h5>
                             <p class="card-text" th:text="${b.content}"></p>
+                            <p>
+                                <th:block th:include="/board/tags"></th:block>
+                            </p>
                             <hr>
                             <h6 class="card-title d-flex justify-content-between align-items-center">
                                 <span>댓글 리스트</span>

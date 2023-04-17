@@ -10,6 +10,7 @@ public interface BoardImgMapper {
     // 게시글에 이미지 등록
     // 게시글에 이미지 삭제 (수정 x)
     List<BoardImgDto> findByBId(int bId);
+    BoardImgDto findByBiId(int biId); // biId (이미지번호)는 pk 라서 무조건 하나의 결과가 나온다.
     int insertOne(BoardImgDto boardImg);
     int deleteOne(int biId);
 

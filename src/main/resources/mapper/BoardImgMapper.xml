@@ -17,7 +17,11 @@
         SELECT * FROM board_imgs WHERE b_id=#{bId}
     </select>
 
-<!--    <select id="findByBId" resultType="BoardImgDto">-->
+    <select id="findByBiId" resultMap="BoardImgMap">
+        SELECT * FROM board_imgs WHERE bi_id=#{biId}
+    </select>
+
+    <!--    <select id="findByBId" resultType="BoardImgDto">-->
 <!--        SELECT bi_id biId, b_id bId, img_path imgPath FROM board_imgs WHERE b_id=#{bId}-->
 <!--        🍏resultType : 테이블 칼럼명 Dto 필드명 맵핑(이름동일하게 맞춰주기) // resultMap 사용시 할 필요없다.-->
 <!--         Dto 파싱  -->

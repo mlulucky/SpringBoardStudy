@@ -9,9 +9,69 @@
 <head>
     <meta charset="UTF-8">
     <title>게시판 리스트</title>
+
 </head>
 <div layout:fragment="content">
     <h1 class="my-4">게시판 리스트</h1>
+    <form action="">
+        <div class="input-group">
+            <label class="input-group-text bi bi-search"></label>
+            <select name="searchField" class="form-control">
+                <option value="u_id">유저</option>
+                <option value="title" selected>제목</option>
+                <option value="content">내용</option>
+            </select>
+            <input type="text" class="form-control" name="searchValue" placeholder="검색어 입력">
+            <button class="btn btn-primary">검색</button>
+        </div>
+    </form>
+    <nav aria-label="Page navigation example">
+        <ul class="pagination">
+            <li class="page-item">
+                <a class="page-link"
+                   th:classappend="${!page.prev ? 'disabled':''}"
+                   th:href="@{''(page=${page}, order=${page.order}, direct=${page.direct}, searchField=${page.searchField})}">
+                    First
+                </a>
+            </li>
+
+            <li class="page-item">
+                <a class="page-link"
+                   th:classappend="${!page.prev ? 'disabled':''}"
+                   th:href="@{''(page=${page.prevPage}, order=${page.order}, direct=${page.direct}, searchField=${page.searchField})}">
+                    Prev
+                </a>
+            </li>
+            <!-- 반환되는 인덱스 p -->
+            <li class="page-item" th:each="p : ${#numbers.sequence(1,page.lastPage)}">
+                <a class="page-link"
+                   th:classappend="${(p==page.page)?'active':''}"
+                   th:href="@{''(page=${p}, order=${page.order}, direct=${page.direct}, searchField=${page.searchField})}" th:text="${p}"></a>
+            </li>
+<!--            <li class="page-item"><a class="page-link" href="?page=2">2</a></li>-->
+<!--            <li class="page-item"><a class="page-link" href="?page=3">3</a></li>-->
+<!--            !page.next == page.next 가 false 일때 -->
+
+
+            <li class="page-item">
+                <a class="page-link"
+                   th:classappend="${!page.next ? 'disabled':''}"
+                   th:href="@{''(page=${page.nextPage}, order=${page.order}, direct=${page.direct}, searchField=${page.searchField})}">
+                    Next
+                </a>
+            </li>
+
+            <li class="page-item">
+                <a class="page-link"
+                   th:classappend="${!page.next ? 'disabled':''}"
+                   th:href="@{''(page=${page.lastPage}, order=${page.order}, direct=${page.direct}, searchField=${page.searchField})}">
+                    Last
+                </a>
+            </li>
+
+        </ul>
+    </nav>
+    <p th:text="${page}"></p>
     <!-- 🍉게시글 좋아요 ajax -->
     <script src="/public/js/BoardLike.js" defer></script>
 <!--    <p th:text="${boards}"></p>--> <!-- 게시글 불러와지는지 체크 (컨트롤러에서 boards 객체를 보냄)-->
@@ -36,13 +96,14 @@
                 <div class="card-body">
                     <!-- 이미지 -->
 <!--                    b.imgs 가 null 이 아닐때만 출력-->
+<!--                    id , data-bs-target : 슬라이드 적용대상-->
                     <div th:if="${b.imgs!=null}" th:id="'carousel'+${b.bId}" class="carousel slide" data-bs-ride="carousel">
                         <div class="carousel-inner">
 <!--                            🍉 글쓴이가 쓴글은 수정하기 버튼 보이게 하기!-->
 <!--                           th:classappend="${state.first}?'active':'' =>  이미지가 첫번째이면 active 클래스를 주고 아니면 아무것도 안준다.-->
                             <div class="carousel-item" th:each="img,state : ${b.imgs}" th:classappend="${state.first}?'active':''">
                                 <img th:src="@{'{path}'(path=${img.imgPath})}" class="d-block w-100" alt="게시글 이미지">
-                                <p th:text="${state}"></p>
+<!--                                <p th:text="${state}"></p>-->
                             </div>
                                 <!-- state : 이미지 상태가 있다. -->  <!-- forEach -->
 <!--                            {index = 2, count = 3, size = 3, current = BoardImgDto(biId=34, bId=21, imgPath=/public/img/board/1681175775739_99439.png)   -->
@@ -62,6 +123,9 @@
                     <div>
                         <h5 class="card-title" th:text="${b.title}"></h5>
                         <p class="card-text" th:text="${b.content}"></p>
+                        <p>
+                            <th:block th:include="/board/tags"></th:block>
+                        </p>
                     </div>
                 </div> <!-- // 카드 body : 이미지, 제목, 내용 -->
 
