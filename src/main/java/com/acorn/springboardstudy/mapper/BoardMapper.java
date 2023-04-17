@@ -2,6 +2,8 @@ package com.acorn.springboardstudy.mapper;
 
 import com.acorn.springboardstudy.dto.BoardDto;
 import com.github.pagehelper.Page;
+import com.acorn.springboardstudy.dto.PageDto;
+
 import org.apache.ibatis.annotations.Mapper;
 import org.springframework.stereotype.Repository;
 
@@ -16,7 +18,7 @@ import java.util.List;
 
 
 @Mapper // Mybatis 의 session factory(컨테이너) 에서 생성 및 관리하는 컴포넌트. 컨포넌트(컨테이너에서 관리되는 객체)로 생성할 타입 이다 라고 선언?
-// @Repository // 🔥JDBC dao 를 만들어서 Spring Container 로 관리하는 스프링 컴포넌트 // 컨포넌트 , spring 컨테이너 의 dao 의 의미
+@Repository // 🔥JDBC dao 를 만들어서 Spring Container 로 관리하는 스프링 컴포넌트 // 컨포넌트 , spring 컨테이너 의 dao 의 의미
 public interface BoardMapper {
     // 리스트, 상세, 등록, 수정, 삭제, 신고
     // 상세 보기시 조회수 올리기
@@ -24,9 +26,15 @@ public interface BoardMapper {
 
     // 🍏함수를 호출. 실행하면 Mapper.xml 의 sql 쿼리 문이 실행되고
     // resultMap(resultType)맵핑된 결과가 나온다.
-    Page<BoardDto> findAll(); // com.github.pagehelper.Page > List+page 결과를 가지고 있다.
+//    Page<BoardDto> findAll(); // com.github.pagehelper.Page > List+page 결과를 가지고 있다.
 //    List<BoardDto> findByTag(String tag); // 다이나믹 쿼리 실행
 //    List<BoardDto> findAll(String loginUserId); // 다이나믹 쿼리 실행
+
+    List<BoardDto> findAll(PageDto pageDto);
+    int countAll(PageDto pageDto); // 페이지 네비게이션의 수를 알기 위해
+    // List<BoardDto> findAll(String loginUserId); // 다이나믹 쿼리 실행
+    List<BoardDto> findByTag(String tag); // 해시태그로 게시물 검색
+
     BoardDto findByBId(int bId);
     int insertOne(BoardDto board);
     int updateOne(BoardDto board);

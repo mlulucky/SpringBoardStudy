@@ -5,6 +5,12 @@
 <!--<script src="/bootstrap/js/bootstrap.bundle.js"></script>-->
 <!-- 🍒control + space bar : 경로 자동완성 -->
 <!-- webjars : 외부라이브러리로 bootstrap 라이브러리 추가 -->
+<style>
+    #tagListCont .list-group-item:hover { /* hover 됬을때 */
+        background-color: #31363b !important;
+    }
+</style>
+
 <nav class="navbar navbar-expand-lg bg-body-tertiary">
     <div class="container-fluid">
         <a class="navbar-brand" href="/">HOME</a>
@@ -23,15 +29,22 @@
                         <i class="bi bi-plus-square"></i>
                     </a>
                 </li>
+                <li class="nav-item">
+                    <!--열리는 타겟 - href="#offcanvasSearch" // 버튼 아니고 메뉴인것처럼 nav-link -->
+                    <a class="nav-link" data-bs-toggle="offcanvas" href="#offcanvasSearch" role="button" aria-controls="offcanvasExample">
+                        해시태그 검색
+                        <i class="bi bi-search"></i>
+                    </a>
+                </li>
             </ul>
             <div class="d-flex">
                 <ul class="breadcrumb">
                     <!--          <th:> th 블럭. 구분자, 중괄호 같은 // ${ } : 변수 표시 -->
                     <th:block th:if="${session.loginUser==null}"> <!-- 로그인 X / 세션의 로그인유저가 null 이면 -->
-                        <li class="breadcrumb-item">
+                        <li>
                             <a class="nav-link" href="/user/login.do">로그인</a>
                         </li>
-                        <li class="breadcrumb-item">
+                        <li>
                             <a class="nav-link" href="/user/signup.do">회원가입</a>
                         </li>
                     </th:block>
@@ -53,8 +66,8 @@
                             (<span th:text="${session.loginUser.name}"></span>)
                             </a>
                         </li>
-                        <li class="breadcrumb-item">
-                            <a class="nav-link" href="/user/logout.do">로그아웃</a>
+                        <li>
+                            <a class="nav-link" href="/user/logout.do">/ 로그아웃</a>
                         </li>
                     </th:block>
                 </ul>
@@ -63,6 +76,74 @@
         </div>
     </div>
 </nav>
+
+<div class="offcanvas offcanvas-start text-bg-dark" tabindex="-1" id="offcanvasSearch" aria-labelledby="offcanvasExampleLabel">
+    <div class="offcanvas-header">
+        <h5 class="offcanvas-title" id="offcanvasExampleLabel">해시태그 검색</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body">
+        <div class="input-group">
+            <label class="input-group-text bg-dark text-white">
+                <i class="bi bi-hash"></i>
+            </label>
+            <!-- 검색창 -->
+            <input type="text" id="searchTagInput" class="form-control" placeholder="해시태그">
+        </div>
+        <hr>
+        <!-- 검색한 해시태그 리스트 -->
+        <div id="tagListCont" class="list-group">
+        <!-- 해시태그 리스트를 넣는다 (html 을 컨포넌트화 tagListComponent) => -->
+        </div>
+    </div>
+</div>
+<script>
+    function tagListComponent(tagObj){ // tagObj : {"tag":"홍대","bCnt":8}
+        // html 을 컨포넌트화
+        return `
+        <!--         태그로 조회하는 리스트 -->
+            <a href="/board/${tagObj.tag}/tagList.do" class="list-group-item text-bg-dark d-flex align-items-center">
+                <i class="bi bi-hash border rounded-circle fs-2 d-flex justify-content-center align-items-center" style="width:45px; height: 45px;"></i> <!-- 동그라미 효과 - border rounded-circle // 동그라미 늘어남 없애기(d-flex) align-items-center -->
+                <div class="ms-3">
+                    <div>
+                        <i class="bi bi-hash"></i> <!-- 해시태그 아이콘 -->
+                        <span>${tagObj.tag}</span> <!-- 받아와서 출력 -->
+                    </div>
+                    <div class="text-white text-opacity-75">
+                        <small>게시물</small>
+                        <small>${tagObj.bCnt}</small>
+                    </div>
+                </div>
+            </a>
+        `;
+    }
+    const searchTagInput=document.getElementById("searchTagInput");
+    const tagListCont=document.getElementById("tagListCont");
+    searchTagInput.addEventListener("input",async (e)=>{ // input 이벤트가 발생하면 이벤트를 발생하겠다~!
+        let tag=searchTagInput.value; // 입력한 값
+        if(tag.length>0){
+            const tags=await searchTags(tag);
+            // console.log(tags);
+            if(tags){ // tags 가 있으면
+                tagListCont.innerHTML=""; // 검색리스트를 초기화 하면서 추가하기~!
+                for(const tagObj of tags){ // == 자바 for ( : )
+                    tagListCont.insertAdjacentHTML("beforeend", tagListComponent(tagObj)); // tagListCont 태그 안에 해시태그 리스트를 담는다.
+                    // tags => [{"tag":"홍대","bCnt":8},{"tag":"홍대놀이터","bCnt":1},{"tag":"홍대맛집","bCnt":2},{"tag":"홍대애견","bCnt":0},{"tag":"홍대입구","bCnt":0},{"tag":"홍대카페","bCnt":0}]
+                }
+            }
+        }
+    });
+    async function searchTags(tag){
+        let url=`/hashtag/${tag}/search.do`
+        const resp=await fetch(url);
+        if(resp.status===200){
+            return await resp.json(); // json 응답을 반환 {"tag": "홍대", "bCnt": "10"} key는 value 로 값을 가져오기 위해서
+            // 🍒resp.json()은 HTTP 응답 객체에서 JSON 데이터를 추출하여 JavaScript 객체로 변환
+        }
+    }
+
+
+</script>
 
 <th:block th:if="${msg!=null || session.msg!=null}"> <!-- msg 메세지가 있으면 (null 이 아니면) -->
     <div id="actionModal" class="modal" tabindex="-1"> <!-- 자바스크립트에서 modal 을 찾기위해 id 값을 준다.(모달창 안떠서) -->

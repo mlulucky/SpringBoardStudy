@@ -35,6 +35,10 @@
       <label for="contentInput" class="form-label">글내용</label>
       <textarea id="contentInput" name="content" rows="4" class="form-control"></textarea>
     </p>
+<!--    해시태그 등록-->
+    <div class="mb-3">
+      <th:block th:include="/board/tagsinput.html"></th:block>
+    </div>
     <p class="text-end">
 <!--  등록버튼을 누르면 처리하는 컨트롤러가 필요하다. -->
       <button type="reset" class="btn btn-warning">초기화</button>
@@ -47,12 +51,12 @@
     const imgAddBtn=document.getElementById("imgAddBtn");
     const imgCont=document.getElementById("imgCont");
     imgAddBtn.addEventListener("click",(e)=>{
-      imgCont.insertAdjacentHTML("beforeend",imgInputComponent());
+      imgCont.insertAdjacentHTML("beforeend",imgInputComponent()); //🔥
     });
 
 
     // 컨포넌트를 쓰는 이유 ? 매개변수를 받아서 사용할 수 있다.
-    function imgInputComponent(label="이미지",name="img"){ // html 을 문자열로 가지고 있는 컨포넌트
+    function imgInputComponent(label="이미지",name="img"){ // 🔥html 을 문자열로 가지고 있는 컨포넌트
       // html 문자열 반환
       return `<p class="input-group mt-2">
                 <label class="input-group-text">${label}</label>

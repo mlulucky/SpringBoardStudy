@@ -36,6 +36,11 @@
                     column="b_id"
                     fetchType="lazy"/> <!-- 조회하는 곳에서만 조인처럼 조회 하겠다. -->
 
+        <collection property="tags"
+                    select="com.acorn.springboardstudy.mapper.BoardHashTagMapper.findByBId"
+                    column="b_id"
+                    fetchType="lazy"/>
+<!--        컬렉션의 property 를 조회해야지 나온다햐. 컬럭센을 -->
         <!--  🍎collection 복합관계 맵핑 (🍏1:N join 했을때 사용) => 🍏join 안하고 컬렉션에서 select 로 호출하기(권장) -->
         <!--  ofType : imgs 리스트의 제네릭에 들어갈 데이터 타입 // List <BoardImgDto>  -->
             <!-- 🍏결과 : resultMap BoardDto 의 필드 imgs -> BoardDto.imgs , List<BoardImgDto> 리스트타입, 제네릭은 BoardImgDto 타입 -->
@@ -109,13 +114,45 @@
     </delete>
 
 
-    <!-- 보드_게시글_리스트 // SELECT 문 // 보드맵에서 보드리스트를 가져올때 -->
+
+<!--
+    &lt;!&ndash; 보드_게시글_리스트 // SELECT 문 // 보드맵에서 보드리스트를 가져올때 &ndash;&gt;
     <select id="findAll" resultMap="BoardMap">
-        <!-- 모든데이터베이스는 변수를 등록할수있다 => loginUserId 파라미터로 사용하는게 아니라 변수로 쓰기 -->
+        &lt;!&ndash; 모든데이터베이스는 변수를 등록할수있다 => loginUserId 파라미터로 사용하는게 아니라 변수로 쓰기 &ndash;&gt;
         SELECT *  FROM boards
 
     </select>
+-->
 
+<!-- 보드_게시글_리스트 // SELECT 문 // 보드맵에서 보드리스트를 가져올때 -->
+<!-- SELECT * FROM boards ORDER BY post_time DESC LIMIT 20,10 -->
+<!--    http://localhost:8080/board/list.do?page=1&order=post_time&direct=DESC&searchField=title-->
+    <select id="findAll" resultMap="BoardMap" parameterType="PageDto">
+        SELECT *
+            FROM boards
+            <!-- 서칭을 위한 다이나믹 쿼리 // 파라미터 #{}, dto 변수 ${} -->
+            <if test="searchField!=null and searchValue!=null">
+                WHERE ${searchField} like concat('%',#{searchValue},'%')
+            </if>
+            ORDER BY ${order} ${direct}
+            LIMIT #{startIndex},#{offset}
+    </select>
+
+    <!-- 검색된 총 개수 => 페이징의 개수를 알수 있다. // 개수를 반환하니. 타입을 int 로 -->
+    <select id="countAll" resultType="int" parameterType="PageDto">
+        SELECT COUNT(*)
+        FROM boards
+        <if test="searchField!=null and searchValue!=null">
+            WHERE ${searchField} like concat('%',#{searchValue},'%')
+        </if>
+    </select>
+
+    <!-- 모든데이터베이스는 변수를 등록할수있다 => loginUserId 파라미터로 사용하는게 아니라 변수로 스기 -->
+    <!--        SELECT *,-->
+    <!--        <if test="#{loginUserId!=null}"> &lt;!&ndash; 유저가 로그인한 경우 // 로그인한 유저가 null 이 아닌경우 다이나믹 쿼리 &ndash;&gt;-->
+    <!--               (SELECT status FROM board_likes WHERE b_id=boards.b_id AND u_id=#{loginUserId})  login_user_like_status-->
+    <!--        </if>-->
+    <!--        FROM boards-->
 
 <!--    # 복합객체맵핑-->
 <!--    # SELECT b.*,u.name 'user.name' FROM boards b INNER JOIN users u USING (u_id)-->
@@ -136,13 +173,24 @@
         <!-- bId : findByBId 함수의 매개변수 이름을 그대로 받는다. -->
     </select>
 
+    <select id="findByTag" resultMap="BoardMap">
+        SELECT boards.* FROM boards INNER JOIN board_hashtags
+                 USING(b_id)
+                 WHERE tag=#{tag}
+    </select>
+<!--    fetch 는 조회가 끝나고 하나하나 조회하면서 다시 불러오는 것-->
+<!--    쿼리는 테이블에 정보를 불러오는 거. 일단 조회를 해야하는것. 조회를 하고 결과에 association, collection 으로 불러오는거 -->
 
 
 
-<!--     🍏 association 은  N : 1 join (결과 1개 반환) /  collection 은  1 : N join (결과 여러개(List) 반환)
-            association 은 resultType 으로도 맵핑,조인 가능하지만
-            collection 은 resultMap 으로만 맵핑, 조인 가능하다.
--->
+<!--    🍉동일한 쿼리문 => SELECT * FROM webAppBoard.boards WHERE b_id in (SELECT b_id FROM webAppBoard.board_hashtags WHERE tag='홍대')-->
+<!--#         SELECT *,hashtags.tag FROM boards INNER JOIN hashtags WHERE tag=#{tag}-->
+
+
+    <!--     🍏 association 은  N : 1 join (결과 1개 반환) /  collection 은  1 : N join (결과 여러개(List) 반환)
+                association 은 resultType 으로도 맵핑,조인 가능하지만
+                collection 은 resultMap 으로만 맵핑, 조인 가능하다.
+    -->
 
 <!--     1)🍏 1:N (보드 : 이미지)관계 컬렉션 복합관계 맵핑 조인하는 법 => resultMap 에서도 collection 으로 복합맵핑-->
 <!--    <select id="findAll" resultMap="BoardMap">-->

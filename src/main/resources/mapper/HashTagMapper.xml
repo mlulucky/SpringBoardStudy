@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.acorn.springboardstudy.mapper.HashTagMapper">
+    <resultMap id="HashTagMap" type="HashTagDto">
+        <id property="tag" column="tag"/>
+<!--        bCnt 로 맵핑, countByTag 쿼리 실행. 조건은 tag-->
+        <association property="bCnt"
+        select="com.acorn.springboardstudy.mapper.BoardHashTagMapper.countByTag"
+        column="tag"/>
+
+    </resultMap>
+    <insert id="insertOne">
+        INSERT INTO hashtags (tag) VALUE(#{tag});
+    </insert>
+<!--        # 해시태그 연관검색어 조회-->
+<!--        # 🍉mysql 은 문자열 더하기 연산을 못쓴다 #{tag}+'%' -> mysql 문자열 더하기 함수 사용 CONCAT (자바도 string.CONCAT() 이 있다)-->
+    <select id="findByTagContains" resultMap="HashTagMap">
+        SELECT * FROM webAppBoard.hashtags WHERE tag like CONCAT(#{tag},'%')
+    </select>
+    <select id="findByTag" resultMap="HashTagMap">
+        SELECT * FROM webAppBoard.hashtags WHERE tag=#{tag}
+    </select>
+
+</mapper>
