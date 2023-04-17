@@ -125,12 +125,13 @@
 -->
 
 <!-- 보드_게시글_리스트 // SELECT 문 // 보드맵에서 보드리스트를 가져올때 -->
+    <!-- 필요한 파라미터 : searchValue : 서칭할 내역, order by 내용, 방향, limit start인덱스, 보여지는 개수(offset) -->
 <!-- SELECT * FROM boards ORDER BY post_time DESC LIMIT 20,10 -->
 <!--    http://localhost:8080/board/list.do?page=1&order=post_time&direct=DESC&searchField=title-->
     <select id="findAll" resultMap="BoardMap" parameterType="PageDto">
         SELECT *
             FROM boards
-            <!-- 서칭을 위한 다이나믹 쿼리 // 파라미터 #{}, dto 변수 ${} -->
+            <!-- if 의 조건문 test // 검색을 위한 다이나믹 쿼리 // 파라미터 #{}, dto 변수(칼럼명으로 쓰임) ${} -->
             <if test="searchField!=null and searchValue!=null">
                 WHERE ${searchField} like concat('%',#{searchValue},'%')
             </if>
@@ -138,7 +139,7 @@
             LIMIT #{startIndex},#{offset}
     </select>
 
-    <!-- 검색된 총 개수 => 페이징의 개수를 알수 있다. // 개수를 반환하니. 타입을 int 로 -->
+    <!-- 검색된 총 개수 => 페이징의 개수(검색개수/오프셋개수)를 알수 있다. // 개수를 반환하니. 타입을 int 로 -->
     <select id="countAll" resultType="int" parameterType="PageDto">
         SELECT COUNT(*)
         FROM boards

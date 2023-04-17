@@ -32,6 +32,7 @@ public interface BoardMapper {
 
     List<BoardDto> findAll(PageDto pageDto);
     int countAll(PageDto pageDto); // 페이지 네비게이션의 수를 알기 위해
+
     // List<BoardDto> findAll(String loginUserId); // 다이나믹 쿼리 실행
     List<BoardDto> findByTag(String tag); // 해시태그로 게시물 검색
 

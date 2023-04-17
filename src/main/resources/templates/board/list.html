@@ -13,9 +13,9 @@
 </head>
 <div layout:fragment="content">
     <h1 class="my-4">게시판 리스트</h1>
-<<<<<<< HEAD
+
 <!--    <p th:text="${boards}"></p>-->
-=======
+    <!-- 검색창 / 검색 카테고리, 검색내용-->
     <form action="">
         <div class="input-group">
             <label class="input-group-text bi bi-search"></label>
@@ -28,6 +28,7 @@
             <button class="btn btn-primary">검색</button>
         </div>
     </form>
+
     <nav aria-label="Page navigation example">
         <ul class="pagination">
             <li class="page-item">
@@ -51,7 +52,7 @@
                    th:classappend="${(p==page.page)?'active':''}"
                    th:href="@{''(page=${p}, order=${page.order}, direct=${page.direct}, searchValue=${page.searchValue}, searchField=${page.searchField})}" th:text="${p}"></a>
             </li>
-<!--            <li class="page-item"><a class="page-link" href="?page=2">2</a></li>-->
+<!--            <li class="page-item"><a class="page-link" href="?page=2">2</a></li>--><!-- 현재페이지에서 쿼리스트링 ?page=2 -->
 <!--            <li class="page-item"><a class="page-link" href="?page=3">3</a></li>-->
 <!--            !page.next == page.next 가 false 일때 -->
 
@@ -75,7 +76,7 @@
         </ul>
     </nav>
     <p th:text="${page}"></p>
->>>>>>> paging
+
     <!-- 🍉게시글 좋아요 ajax -->
     <script src="/public/js/BoardLike.js" defer></script>
 <!--    <p th:text="${boards}"></p>--> <!-- 게시글 불러와지는지 체크 (컨트롤러에서 boards 객체를 보냄)-->

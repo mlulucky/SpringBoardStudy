@@ -4,18 +4,19 @@ import lombok.Data;
 
 @Data
 public class PageDto {
-    private int page=1; // 페이지
+    private int page=1; // 현재 페이지
     private int offset=10; // 한페이지에 몇개를 보여줄거냐
     private int startIndex=0; // 기본값이 0이라서 안해도 되는데, 0으로 설정 // 몇번 인덱스부터 시작할건지
     private String order="post_time"; // 정렬 // 기본값
     private String direct="DESC"; // 정렬순서
-    private String search; // 어떻게 서칭할지
-    private String searchValue;
-    private String searchField;
+
+    // 검색
+    private String searchValue; // 검색내용
+    private String searchField; // 검색 카테고리
 
     // 페이지 네비게이션의 수 알기
     private int totalRows;
-    private int lastPage; // == lastPage
+    private int lastPage;
     private int prevPage;
     private int nextPage;
     private boolean prev; // 첫번째 페이징버튼에서는 버튼 비활성화 위해
@@ -33,13 +34,13 @@ public class PageDto {
         this.next=(this.page<lastPage);
     }
 
-    public PageDto(){} // 🍉 기본 생성자 - 파라미터의 required=true 강제를 없애준다.
+    public PageDto(){} // 🍉 기본 생성자 - 파라미터의 required=true 강제를 없애준다.(파라미터가 없어도 에러발생 x)
 
 
     public void setSearchValue(String searchValue) {
         // 공백이 아니면
         if(!searchValue.trim().equals("")) this.searchValue = searchValue;
-//        if(!searchValue.trim().length()>0) this.searchValue = searchValue;
+//        if(searchValue.trim().length()>0) this.searchValue = searchValue;
     }
 
     public void setSearchField(String searchField) {
@@ -47,16 +48,17 @@ public class PageDto {
         if(!searchField.trim().equals(""))this.searchField = searchField;
     }
 
-    public int getStartIndex() {
-        this.startIndex=(page-1)*offset;
+    // 🍒startIndex 는 페이지를 얻을때 받으려고 해서 아래에 매개변수에 추가 안함.
+    // => 1페이지의 첫번째 인덱스는 0(page-1), 2페이지의 첫번째 인덱스는 5 ....
+    public int getStartIndex() { // startIndex 계산하기
+        this.startIndex=(page-1)*offset; // this == pateDto 객체
         return this.startIndex;
 //        return (this.startIndex=(1-page)*offset);
     }
 
     // 🍒생성자를 정의하면 강제하는 것
-    // default 생성자 없이 생성자를 정의하고 @ModelAttribute 로 사용하면 생성자에서 사용하는 기본형 파라미터(생성자의 매개변수)들을 required=true 로 정의한다.
+    // default 생성자 없이 생성자를 정의하고 @ModelAttribute 로 PageDto 를 사용하면 생성자에서 사용하는 기본형 파라미터(생성자의 매개변수 중에서 정수)들을 required=true 로 정의한다.
     // 정수는 required=true 처리되고 무조건 있어야 한다. (문자열은 null 로 취급이 되서 문자열은 안적어도된다)
-    // startIndex 는 페이지를 얻을때 받으려고 해서 아래에 매개변수에 추가 안함. => 1페이지의 첫번째 인덱스는 0, 2페이지의 첫번째 인덱스는 5 ....
 //    public PageDto(int page, int offset, String order, String direct, String search) {
 //        this.page = page;
 //        this.offset = offset;

@@ -44,6 +44,7 @@ public class BoardController {
                        @SessionAttribute(required = false)UserDto loginUser, // 🍉로그인 한사람만 리스트에 들어올수 있으니. 로그인안해도 들어올수 있게 required=false 로
                        @ModelAttribute PageDto pageDto // 파라미터 정수 다 있어야지 페이지가 뜬다. 없으면 페이지 에러뜸 http://localhost:8080/board/list.do?page=1&offset=10&order=b_id&direct=asc
                        ){ // Model 뷰에 객체를 전달
+//        log.info("pageDto = " + pageDto);
         List<BoardDto> boards;
         boards=boardService.list(loginUser, pageDto); // 페이지를 불러올때, 페이징도 불러오기
         model.addAttribute("page",pageDto);
@@ -55,7 +56,7 @@ public class BoardController {
 //        List<BoardDto> boards=boardService.list();
         model.addAttribute("boards",boards); // 뷰에 객체를 전달
         return "/board/list"; // 렌더할 뷰 (board 폴더 안에 list.html)
-        // return pageDto; // jackson 이 파라미터를 가져올때(파싱할때) 다 get 으로 가져온다.
+        // return pageDto; // 🍒jackson 이 파라미터를 가져올때(파싱할때) 다 get 으로 가져온다. => startIndex 만 해도, getStartIndex 가 호출된다.
     }
 
     @GetMapping("/{tag}/tagList.do")
