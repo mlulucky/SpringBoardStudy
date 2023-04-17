@@ -56,4 +56,10 @@ mybatis:
 # *Mapper.xml => 복수인 이유는 Mapper.xml 파일이 여러개이니까
 # type-aliases-package: 패키지명 설정 / Mapper.xml 파일에서 com.acron.springmavenboard.dto 패키지명을 생략할 수있다.
 
+# 페이징을 만들어주는 라이브러리. 쿼리를 자동생성해준다.
+pagehelper:
+  helper-dialect: mysql
+  reasonable: true
+
+
 

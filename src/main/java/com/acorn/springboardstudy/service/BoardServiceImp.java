@@ -5,6 +5,7 @@ import com.acorn.springboardstudy.dto.BoardImgDto;
 import com.acorn.springboardstudy.mapper.BoardImgMapper;
 import com.acorn.springboardstudy.mapper.BoardMapper;
 import com.acorn.springboardstudy.mapper.UserMapper;
+import com.github.pagehelper.PageHelper;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,6 +31,9 @@ public class BoardServiceImp implements BoardService {
     public List<BoardDto> list(String loginUserId) {
 //        List<BoardDto> list=boardMapper.findAll(loginUserId); // 서브쿼리로 좋아요 불러오기
         userMapper.setLoginUserId(loginUserId); // 로그인한 유저 아이디를 mysql 서버에 변수로 등록
+//        PageHelper.startPage(1,5,"b_id");
+        PageHelper.startPage(2,5,"b_id");
+
         List<BoardDto> list=this.boardMapper.findAll(); // 지연로딩으로 좋아요 불러오기
         userMapper.setLoginUserIdNull(); // 사용이 끝나서 삭제 // 지연로딩으로 조인이 조금 늦어서 불러오기전에 먼저 삭제를 해서(null 을 만듬) 상태가 자꾸 null 이 됨.
         // 보드에서 조회할때는 즉시로딩으로 바꾸기

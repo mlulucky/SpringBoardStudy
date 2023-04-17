@@ -1,6 +1,7 @@
 package com.acorn.springboardstudy.mapper;
 
 import com.acorn.springboardstudy.dto.BoardDto;
+import com.github.pagehelper.Page;
 import org.apache.ibatis.annotations.Mapper;
 import org.springframework.stereotype.Repository;
 
@@ -23,8 +24,9 @@ public interface BoardMapper {
 
     // 🍏함수를 호출. 실행하면 Mapper.xml 의 sql 쿼리 문이 실행되고
     // resultMap(resultType)맵핑된 결과가 나온다.
-    List<BoardDto> findAll();
-    List<BoardDto> findAll(String loginUserId); // 다이나믹 쿼리 실행
+    Page<BoardDto> findAll(); // com.github.pagehelper.Page > List+page 결과를 가지고 있다.
+//    List<BoardDto> findByTag(String tag); // 다이나믹 쿼리 실행
+//    List<BoardDto> findAll(String loginUserId); // 다이나믹 쿼리 실행
     BoardDto findByBId(int bId);
     int insertOne(BoardDto board);
     int updateOne(BoardDto board);
