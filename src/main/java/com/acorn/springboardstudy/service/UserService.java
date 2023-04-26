@@ -24,11 +24,15 @@ import org.springframework.stereotype.Service;
 
 @Service // @Component 하위 자식 어노테이션으로 service 를 관리하는(관심사 분리) 명시적 의미와 @Transactional 을 정의 가능
 public interface UserService {
-    // 로그인 유저상세 수정 회원가입 삭제
+    // 로그인, 유저상세, 수정, 회원가입, 삭제, 이메일 체크시 가입확인
     UserDto login(UserDto user);
-    UserDto detail(String uId);
+    UserDto detail(String uId,String loginUserId);
     int modify(UserDto user);
     int signup(UserDto user);
     int dropout(UserDto user);
+
+    // 이메일체크 -> 상태 바꾸기
+    int modifyEmailCheck(UserDto user);
+
 
 }

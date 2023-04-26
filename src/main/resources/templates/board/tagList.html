@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{/layout}">
+<!-- 🍉layout:decorate 현재 페이지를 레이아웃으로 꾸미겠다
+        / 컨텍스트는 루트 경로
+        /layout.html 파일을 찾아서 레이아웃으로 사용하겠다.-->
+<head>
+    <meta charset="UTF-8">
+    <title>해시태그 검색 게시판 리스트</title>
+    <script src="/public/js/BoardLike.js" defer></script>
+</head>
+<div layout:fragment="content">
+    <h1 class="mt-4">해시태그 검색</h1>
+    <h2 class="mb-4">
+        <i class="bi bi-hash"></i>
+        <span th:text="${tag}"></span>
+    </h2>
+<!--    <p th:text="${page}"></p>-->
+  <!-- 🍉게시글 좋아요 ajax -->
+<!--    <p th:text="${boards}"></p>--> <!-- 게시글 불러와지는지 체크 (컨트롤러에서 boards 객체를 보냄)-->
+    <section id="boardListCont" class="row row-cols-lg-2 row-cols-1 g-5"> <!-- g : 요소간의 간격 --> <!-- md 사이즈일때만, 그리드의 비율을 3개로 / row-cols-1 : 스몰사이즈일때 -->
+        <th:block th:include="/board/includeList.html"></th:block>
+    </section>
+
+    <script> // 스크롤 페이징 - 1.스크롤이 바닥에 닿을때, 2.다음 페이지가 section 태그 안에 불러와진다.
+        // 브라우저 - 스크롤 이벤트
+        let page=1;
+        let lastPage=[[${boards.pages}]]; // 페이징헬퍼 pages : 마지막 페이지
+        const boardListCont=document.getElementById("boardListCont");
+        window.addEventListener("scroll",async ()=>{ // 스크롤이벤트 발생시, 이벤트 실행
+            // console.log("움직이는 중");
+
+            let scrollTop=document.documentElement.scrollTop || document.body.scrollTop; // 🍒스크롤의 위치 // 브라우저마다 크롬 - documentElement, 다른 브라우저에서는 body
+            let clientHeight=document.documentElement.clientHeight || document.body.clientHeight; // 브라우저마다 달라서 쓰고있는 필드명이 달라서 조건을 2개를 준다.
+            let scrollHeight=document.documentElement.scrollHeight || document.body.scrollHeight;
+            scrollHeight-=clientHeight; // scrollHeight=scrollHeight-clientHeight
+            // console.log(scrollTop, clientHeight,scrollHeight);
+            if(scrollTop===scrollHeight){ // 바닥을 체크
+                // console.log("바닥입니다.")
+                if(lastPage===page) { // 바닥을 쳤을때 알람표시 및 메서드 종료
+                    alert("마지막 페이지입니다.");
+                    return; // 메서드 종료. 다음코드 실행안됨.
+                }
+
+                let list=await loadTagList(page+1); // 2번 페이지를 불러온다.
+                if(list){ // list 가 true 일때, 즉 2번페이지 불러오는게 성공하면!
+                    ++page; // 다음 페이지 불러오기
+                    boardListCont.insertAdjacentHTML("beforeend",list);
+                }else {
+                    alert("불러오기 실패");
+                }
+            }
+        })
+
+        async function loadTagList(pageNum){
+            // let path=window.location.pathname; // '/board/%ED%99%8D%EB%8C%80/tagList.do'
+            // let url=path+"?pageNum="+pageNum;
+            let url="/board/[[${tag}]]/ajaxTagList.do?pageNum="+pageNum;
+            const resp=await fetch(url);
+            if(resp.status===200){
+                return await resp.text(); // resp.text() : html 로 받아오기
+            }else {
+                alert("불러오기 실패");
+            }
+        }
+
+
+    </script>
+    <br><br><br><br><br><br><br><br><br><br>
+    <br><br><br><br><br><br><br><br><br><br>
+</div>
+</html>

@@ -1,13 +1,15 @@
 package com.acorn.springboardstudy.mapper;
 
 import com.acorn.springboardstudy.dto.UserDto;
+import org.apache.catalina.User;
 import org.apache.ibatis.annotations.Mapper;
 
 @Mapper
 public interface UserMapper {
-    // 로그인(등급조회 후 로그인 가능), 개인정보조회(등급조회), 수정, 삭제(아이디 비밀번호 확인), 회원가입
-    // 아이디찾기(email,phone,이름 입력시 아이디 반환)
+    // 로그인(등급조회 후 로그인 가능), 개인정보조회(등급조회), 수정, 삭제(아이디 비밀번호 확인), 회원가입, 아이디찾기(email,phone,이름 입력시 아이디 반환)
     // 비밀번호찾기(실제로는 변경) => [email or 핸드폰 인증] 로 변경페이지를 반환(pwUpdate.do) => 비밀번호 변경Action
+    // 이메일 체크코드로 유저를 회원가입 상태 변경
+    int updateStatusByUidAndEmailCheckCode(UserDto user);
 
     UserDto findByUId(String uId);
     UserDto findByUIdAndPw(UserDto user); // 로그인 // permission 이 private 이 아닌 사람만 로그인

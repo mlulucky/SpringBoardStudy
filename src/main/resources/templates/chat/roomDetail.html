@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<div layout:fragment="content">
+    <h1 class="my-4">
+        <span th:text="${crId}"></span>
+        채팅방 상세
+    </h1>
+    <div class="card">
+        <div class="card-header">
+            <h2 class="text-center mb-0">채팅 내역</h2>
+        </div>
+
+        <div class="card-body overflow-scroll" id="msgCont" style="height:50vh;"></div>
+
+        <div class="card-footer">
+            <form action="" name="sendMsgForm">
+                <input type="hidden" name="uId" th:value="${session.loginUser.uId}">
+                <input type="hidden" name="crId" th:value="${crId}">
+                <input type="hidden" name="status" value="CHAT"> <!-- 메세지 제출 상태 -->
+                <input type="hidden" name="nickname" value="">
+                <div class="input-group">
+                    <textarea name="content" disabled class="form-control"></textarea>
+                    <button name="submitBtn" disabled class="btn btn-primary">제출</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- 입장 폼 -->
+        <form class="my-4" name="enterMsgForm">
+            <input type="hidden" name="uId" th:value="${session.loginUser.uId}">
+            <input type="hidden" name="crId" th:value="${crId}">
+            <input type="hidden" name="status" value="ENTER">
+            <input type="hidden" name="content" value="입장">
+            <div class="input-group mx-auto" style="width: 400px">
+                <div class="form-floating">
+                    <input class="form-control" name="nickname" type="text" placeholder="닉네임">
+                    <label>닉네임</label>
+                </div>
+                <button name="submitBtn" class="btn btn-info text-white">입장</button>
+            </div>
+        </form>
+
+
+
+    </div>
+
+    <script th:inline="javascript">
+        const LOGIN_USER_ID=[[${session.loginUser.uId}]];
+        const msgCont=document.getElementById("msgCont");
+        const enterMsgForm=document.forms["enterMsgForm"];
+        const sendMsgForm=document.forms["sendMsgForm"]; // 콘솔창에 변수명 입력해서, 찾아지는지 체크!
+        let lastPostTime; // 메세지를 로드하다가 마지막 메세지의 등록시간(로딩된 마지막 글)
+
+        let listUrl=`/chat/msg/[[${crId}]]/list.do`; // if (lastPostTime)? postTime=lastPostTime
+
+        // 자바스크립트안에서 타임리프 변수르 호출하는 것 -> 대괄호 2개
+        // 화면이 로드되는 이벤트 DOMContentLoaded
+        document.addEventListener("DOMContentLoaded", async (e)=>{
+            // await loadMsgs();
+            // setInterval(async ()=>{ // 3초 뒤 무조건 폴링
+            //     await loadMsgs();
+            // },3000); // 🍒polling
+            await autoLoadMsgs();
+
+        })
+
+        // 재귀함수로 로드된 시점에 폴링하기
+        async function autoLoadMsgs(){
+            let result=await loadMsgs();
+            if(result){
+                await new Promise((resolve)=>{
+                    setTimeout(()=>
+                    {resolve},3000)}); // setTimeout 이 비동기라서, 프로미스안에 넣어야 한다.
+                autoLoadMsgs(); // 내가 내자신을 호출
+            }
+
+
+        }
+
+        sendMsgForm.onsubmit=async (e)=>{
+            e.preventDefault();
+            let register=await registerMsg(sendMsgForm);
+            if(register>0){
+                sendMsgForm.content.value=""; // textarea 공백으로 만들기
+                await loadMsgs();
+            }
+        }
+
+
+        enterMsgForm.onsubmit=async(e)=>{
+            e.preventDefault();
+            let register=await registerMsg(enterMsgForm);
+            if(register>0){
+                await loadMsgs();
+                // alert("등록 성공");
+                enterMsgForm.nickname.setAttribute("disabled",'');
+                enterMsgForm.submitBtn.setAttribute("disabled",'');
+                sendMsgForm.nickname.value=enterMsgForm.nickname.value;
+                sendMsgForm.content.removeAttribute("disabled");
+                sendMsgForm.submitBtn.removeAttribute("disabled");
+
+            }else{
+                alert("등록 실패");
+            }
+        }
+
+        async function registerMsg(formNode){ // formNode : 폼 노드(태그)
+            let url="/chat/msg/register.do";
+            const data=new FormData(formNode) // ajax 로 폼데이터를 데이터, 쿼리스트링으로 만드는 것.
+            const resp=await fetch(url,{method:"POST",body:data});
+            if(resp.status===200){
+                let register=await resp.text(); // 0 실패, 1 성공
+                return register;
+            }
+
+        }
+
+        async function loadMsgs(){
+            let url=listUrl;
+            if(lastPostTime) url+="?postTime="+lastPostTime;
+            const response=await fetch(url);
+            if(response.status===200){
+                // return await response.json();
+                const msgs=await response.json();
+                msgs.forEach((msg,index)=>{
+                    // console.log(msg);
+                    // msgCont.insertAdjacentHTML("beforeend", JSON.stringify(msg));
+                    if((msgs.length-1)===index) { // 마지막 인덱스
+                        lastPostTime=msg.postTime;
+                    }
+
+                    if(msg.status==='CHAT'){
+                        if(LOGIN_USER_ID===msg.uId){ // 로그인한 유저가 보낸 메세지
+                            msgCont.insertAdjacentHTML("beforeend", sendMsgComponent(msg));
+                        }else { // 받은 메세지
+                            msgCont.insertAdjacentHTML("beforeend", receiveMsgComponent(msg));
+                        }
+                    } else if(msg.status==='ENTER') {
+                        msgCont.insertAdjacentHTML("beforeend", enterMsgComponent(msg));
+                    }else if(msg.status==='LEAVE'){
+                        msgCont.insertAdjacentHTML("beforeend", leaveMsgComponent(msg));
+                    }
+                });
+                return true; // 🍒 로드가 완료된 시점 => 폴링에서 사용예정
+            }
+        }
+
+
+        function enterMsgComponent(msgObj){  // 입장 메세지
+            return `
+                <div class="text-center">
+                <strong>${msgObj.nickname}</strong>
+                <strong>(${msgObj.uId})</strong>
+                님 입장
+                <br>
+                <small class="text-muted">${msgObj.postTime}</small>
+            </div>
+            `;
+        }
+        function leaveMsgComponent(msgObj){ // 퇴장 메세지
+            return `
+                <div class="text-center">
+                <strong>${msgObj.nickname}</strong>
+                <strong>(${msgObj.uId})</strong>
+                님 퇴장
+                <br>
+                <small class="text-muted">${msgObj.postTime}</small>
+            </div>
+            `;
+        }
+
+        function receiveMsgComponent(msgObj){
+            return `
+                <div class="d-flex my-2">
+                <div class="align-self-start d-flex flex-column"> <!-- 세로정렬 위 -->
+                    <small>${msgObj.nickname}</small>
+                    <strong>${msgObj.uId}</strong>
+                </div>
+                <div class="bg-primary bg-opacity-10 rounded-2 p-3 mx-2">
+                    ${msgObj.content}
+                </div>
+                <div class="align-self-end"> <!-- 세로정렬 아래로 -->
+                    <small class="text-muted">${msgObj.postTime}</small>
+                </div>
+            </div>
+            `;
+        }
+
+        function sendMsgComponent(msgObj){
+            return `
+                <div class="d-flex my-2 justify-content-end">
+                    <div class="align-self-end"> <!-- 세로정렬 아래로 -->
+                        <small class="text-muted">${msgObj.postTime}</small>
+                    </div>
+                    <div class="bg-warning bg-opacity-25 rounded-2 p-3 mx-2">
+                        ${msgObj.content}
+                    </div>
+                    <div class="align-self-start d-flex flex-column"> <!-- 세로정렬 위 -->
+                        <small>${msgObj.nickname}</small>
+                        <strong>${msgObj.uId}</strong>
+                    </div>
+                </div>
+            `;
+        }
+
+
+
+
+
+    </script>
+
+</div>
+</html>

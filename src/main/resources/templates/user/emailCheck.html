@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head>
+  <title>이메일 체크 폼</title>
+</head>
+<!--  🍏확장자가 html 이고, html 처럼 보이지만 tymeleaf 동적페이지(서버사이드)
+      태그의 속성으로 th 가 있으면 실행 후 렌더링 (타임리프 - 속성으로 동작한다)
+      xmlns:th="" 타임리프 자동완성
+-->
+<!--        style="width:450px; position:relative; top:calc((100vh - 450px) / 2)"> &lt;!&ndash; 보이는 화면 높이 vh // 이메일 체크폼의 높이를 빼준다. &ndash;&gt;-->
+<div layout:fragment="content">
+  <form class="mx-auto" action="/user/emailCheck.do" method="post"
+        style="width:450px;">
+    <input type="hidden" name="uId" th:value="${param.uId}"> <!-- 파라미터의 uId -->
+    <h1 class="my-4">이메일 체크 폼</h1>
+    <div class="input-group">
+      <div class="form-floating">
+        <input type="text" name="emailCheckCode" value="" class="form-control" placeholder="이메일체크 코드"> <!-- name = u_id, uId 상관없음 -->
+        <label>이메일체크 코드</label> <!-- placeholer 안에 라벨이 들어오는거라서 꼭 placeholder 지정해야한다. -->
+      </div>
+      <button class="btn btn-primary">이메일 확인</button> <!-- submit 타입(기본)/ 폼 제출! // 페이로드 : 데이터전송 : input 에 입력한 값이 넘어온다! -->
+    </div>
+
+  </form>
+</div>
+
+</html>

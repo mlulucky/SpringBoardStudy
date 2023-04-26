@@ -20,6 +20,25 @@ spring:
       max-request-size: 5MB
       # 1MB 파일 이미지를 5개 등록하고 싶다 => 5MB 설정
       # 컨트롤러에서 멀티파트 파일을 받을 수 있다.
+
+
+  # 회원가입 이메일 체크 smtp : simple mail transfer protocol
+  # 이메일 smtp 고정 포트번호 587
+  # username : 이메일을 보내주는 계정이다.(회사계정)
+  # password : 구글계정에서 2단계 인증으로 발급받은 앱비밀번호 => 🍉username, password 인증이 안되면 스프링이 안켜진다
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: dmswjdans@gmail.com
+    password: iwxsywooqxyehbsf
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+
 img:
   upload:
     path: ${user.dir}/SpringBoardStudy/src/main/resources/static/public/img

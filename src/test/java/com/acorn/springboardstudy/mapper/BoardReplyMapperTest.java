@@ -33,7 +33,6 @@ class BoardReplyMapperTest {
     @Test
     void findByParentBrId() {
         List<BoardReplyDto> boardReplies = boardReplyMapper.findByParentBrId(16);
-        assertNotNull(boardReplies);
         System.out.println("boardReplies = " + boardReplies);
         assertNotNull(boardReplies);
     }

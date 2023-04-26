@@ -1,6 +1,8 @@
 package com.acorn.springboardstudy.controller;
+import com.acorn.springboardstudy.dto.EmailDto;
 import com.acorn.springboardstudy.dto.UserDto;
 import com.acorn.springboardstudy.lib.AESEncryption;
+import com.acorn.springboardstudy.service.EmailService;
 import com.acorn.springboardstudy.service.UserService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
@@ -16,6 +18,8 @@ import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import javax.swing.*;
+import java.security.SecureRandom;
+import java.util.Base64;
 
 @AllArgsConstructor // 🍒객체를 주입 // 🍒모든 필드를 POJO 형식의 생성자로 자동 생성 (컴파일할때! 왜? 어노테이션은 컴파일할때 실행)
 @Controller // 요청과 응답을 처리하는 기능 // @Component 의 일종(@Component 부모 / @Controller 자식)
@@ -30,6 +34,8 @@ public class UserController {
     // 🍒동적페이지 - @GetMapping, @PostMapping 으로 정의된 함수
 
     private UserService userService;
+    private EmailService emailService; // 생성자
+
 //    public UserController(UserService userService) { // 생성자
 //        this.userService = userService;
 //    }
@@ -82,7 +88,7 @@ public class UserController {
     public String modify(@PathVariable String uId, // @PathVariable 은 생략할수없다.
                          @SessionAttribute UserDto loginUser, // 로그인이 안되어있으면 페이지에 접근불가. 400 에러발생
                           Model model){ // Model : 렌더할 뷰에 바로 객체 전달
-        UserDto user=userService.detail(uId);
+        UserDto user=userService.detail(uId,null); // 수정할때, 팔로잉 리스트 필요없어서 null 보냄
         model.addAttribute("user",user);
         return "/user/modify"; // 렌더시, 페이지에 유저가 존재
     }
@@ -99,7 +105,7 @@ public class UserController {
             modify=userService.modify(user);
         }catch (Exception e){
             log.error(e.getMessage());
-            msg+="에러 : "+e.getMessage(); // 수정실패, 에러메시지
+            msg+="에러 : "+e.getMessage(); // 수정실패, 에러메리시지
         }
 
         if(modify>0){
@@ -128,8 +134,8 @@ public class UserController {
             modelAndView.setViewName("redirect:/user/login.do");
             return modelAndView;
         }
-
-        UserDto user=userService.detail(uId);
+        String loginUserId=(loginUser!=null)?loginUser.getUId():null;
+        UserDto user=userService.detail(uId,loginUserId);
         modelAndView.setViewName("/user/detail"); // 1. 뷰를 렌더할때
         modelAndView.addObject("user",user); // 2. user 객체(model)를 쓰겠다.
 
@@ -140,7 +146,36 @@ public class UserController {
 
     @GetMapping("/signup.do")
     public void signupForm(){
-        // return signup.html
+    }
+
+    @GetMapping("/emailCheck.do")
+    public void emailCheckForm(@RequestParam String uId){ // url 파라미터. required true // 파라미터 uId 가 없으면 못들어온다.
+
+    }
+    @PostMapping("/emailCheck.do")
+    public String emailCheckAction(
+            UserDto user,
+            RedirectAttributes redirectAttributes){
+            String msg="";
+        String redirectPath="";
+        int emailCheck=0;
+        try{
+            user.setStatus(UserDto.StatusType.SIGNUP);
+            emailCheck= userService.modifyEmailCheck(user);
+        }catch (Exception e) {
+            log.error(e.getMessage()); // 로그 사용하는 이유 : 로그를 파일로 저장할수있다. => log4j
+        }
+
+        if(emailCheck>0) { // 보낸코드와 생성된 코드가 같은 경우
+            msg="이메일이 확인되었습니다.(회원가입 완료) 로그인하세요";
+            redirectPath="redirect:/user/login.do";
+        }else {
+            msg="이메일로 보낸 코드를 다시 확인하세요";
+            redirectPath="redirect:/user/emailCheck.do";
+            redirectAttributes.addAttribute("uId", user.getUId());
+        }
+        redirectAttributes.addFlashAttribute("msg",msg);
+        return redirectPath;
     }
 
     @PostMapping("/signup.do")
@@ -151,19 +186,37 @@ public class UserController {
         log.info(user.toString()); // 로그는 toString() 쓰는것을 권장
         String errorMsg=null;
         int signup=0;
+
         try{
+            // 난수 생성
+            SecureRandom random=new SecureRandom(); // 바이트인코딩으로 랜덤한 난수로 생성
+            byte[] bytes=new byte[6]; // 6자리 바이트생성
+            random.nextBytes(bytes); // 바이트에 랜덤코드 생성
+            // 이메일 체크코드
+            String emailCheckCode=Base64.getUrlEncoder().withoutPadding().encodeToString(bytes); // 바이트 인코딩을 문자열로 바꿔준다.
+            user.setEmailCheckCode(emailCheckCode);
+            user.setStatus(UserDto.StatusType.EMAIL_CHECK); // 유저 상태를 체크 // 외부에서 참조해서 쓸려면 enum StatusType 이 public 이어야 한다.
             signup=userService.signup(user);
+            if(signup>0){ // 회원가입이 성공하면 이메일을 확인
+                EmailDto emailDto=new EmailDto();
+                emailDto.setTo(user.getEmail()); // 유저에게 메일 보내기
+                emailDto.setTitle("찹찹 가보자고 가입 이메일 확인 코드입니다."); // 보내는 메일 내용
+                emailDto.setMessage("<h1>해당코드를 입력하세요.</h1><h2>CODE : "+emailCheckCode+"</h2>"); // emailCheckCode : 방금생성한 체크코드
+                emailService.sendMail(emailDto);
+
+                // 중요한 내용은 숨기기
+                redirectAttributes.addFlashAttribute("msg","이메일을 확인해야 회원가입을 성공합니다.");
+                // return "redirect:/user/emailCheck.do?uId="+user.getUId();
+                redirectAttributes.addAttribute("uId",user.getUId()); // == ?uId="+user.getUId(); // ? 파라미터 뒤에 자동으로 uId 를 붙여준다.
+                return "redirect:/user/emailCheck.do";
+            }
+
         }catch (Exception e){
             log.error(e); // 로그4j 로 파일로 저장할 수 있다.
             errorMsg=e.getMessage(); // 상세하게 하라고 했지 유저에게 데이터베이스의 에러 내용까지 알려줄 필요는 없다.
         }
-        if(signup>0){
-            redirectAttributes.addFlashAttribute("msg","회원가입을 축하합니다. 로그인하세요");
-            return "redirect:/";
-        }else{
-            redirectAttributes.addFlashAttribute("msg","회원가입 실패 에러 : " + errorMsg);
+        redirectAttributes.addFlashAttribute("msg","회원가입 실패 에러 : " + errorMsg);
             return "redirect:/user/signup.do";
-        }
 
     }
 
@@ -240,6 +293,14 @@ public class UserController {
             log.error(e.getMessage()); // log 주입 - @Log4j2
         }
         if(loginUser!=null){ // 유저가 null 이 아니면
+            // 🍉회원가입 이메일 인증 절차
+            if(loginUser.getStatus()==UserDto.StatusType.EMAIL_CHECK) {
+                // 이메일을 확인할 때까지 로그인 금지
+                redirectAttributes.addFlashAttribute("msg","이메일을 확인해야 가입을 완료합니다.");
+                redirectAttributes.addAttribute("uId",loginUser.getUId());
+                return "redirect:/user/emailCheck.do";
+            }
+
             if(autoLogin!=null && autoLogin==1) { // 자동로그인 값이 있고! 그 값이 1이면! // 1 : 로그인 form 에서 자동로그인 체크시 value
                 String encryptIdValue=AESEncryption.encryptValue(loginUser.getUId());
                 String encryptPwValue=AESEncryption.encryptValue(loginUser.getPw());

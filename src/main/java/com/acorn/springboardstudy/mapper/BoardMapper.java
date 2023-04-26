@@ -1,8 +1,8 @@
 package com.acorn.springboardstudy.mapper;
 
 import com.acorn.springboardstudy.dto.BoardDto;
+import com.acorn.springboardstudy.dto.BoardPageDto;
 import com.github.pagehelper.Page;
-import com.acorn.springboardstudy.dto.PageDto;
 
 import org.apache.ibatis.annotations.Mapper;
 import org.springframework.stereotype.Repository;
@@ -30,9 +30,8 @@ public interface BoardMapper {
 //    List<BoardDto> findByTag(String tag); // 다이나믹 쿼리 실행
 //    List<BoardDto> findAll(String loginUserId); // 다이나믹 쿼리 실행
 
-    List<BoardDto> findAll(PageDto pageDto);
-    int countAll(PageDto pageDto); // 페이지 네비게이션의 수를 알기 위해
-
+    // com.github.pagehelper.Page > List + Page 정보를 가지고 있다.
+    Page<BoardDto> findAll(BoardPageDto pageDto);
     // List<BoardDto> findAll(String loginUserId); // 다이나믹 쿼리 실행
     List<BoardDto> findByTag(String tag); // 해시태그로 게시물 검색
 

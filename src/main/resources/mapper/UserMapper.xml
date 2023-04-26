@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="com.acorn.springboardstudy.mapper.UserMapper">
-    <resultMap id="UserMap" type="UserDto">
+    <resultMap id="UserMap" type="com.acorn.springboardstudy.dto.UserDto">
         <!--        (mybatis 가 반환타입 DTO 필드명을 기준으로 dto 의 필드명과 테이블의 칼럼명이 같은 것을 맵핑)-->
         <!--        SELECT *, u_id uId FROM USERS WHERE u_id=#{uId}-->
         <!--        => SELECT * FROM USERS WHERE u_id=#{uId}-->
@@ -18,20 +18,40 @@
         <result column="address" property="address"/>
         <result column="detail_address" property="detailAddress"/>
         <result column="permission" property="permission"/>
+        <result column="status" property="status"/>
+        <result column="email_check_code" property="emailCheckCode"/>
+        <association property="following"
+                    select="com.acorn.springboardstudy.mapper.FollowMapper.findByToIdAndFromIdIsLoginUserId"
+                    column="u_id"
+                    fetchType="eager"/>
+        <collection
+                property="followings"
+                select="com.acorn.springboardstudy.mapper.FollowMapper.findByFromId"
+                column="u_id"
+                fetchType="lazy"/>
+        <collection
+                property="followers"
+                select="com.acorn.springboardstudy.mapper.FollowMapper.findByToId"
+                column="u_id"
+                fetchType="eager"/>
+                <!-- eager : 즉시조인. 회원수정일때도 유저정보가 필요없는데, 유저정보를 불러온다. 근데 지금은 로그인 유저를 불러오고 삭제전에 팔로잉을 불러와야되서, eager 하는 방법
+                lazy 로 하려면 resultMap 을 2개를 만들던가 하는데 지금은 eager 방법이 가장 나은.. -->
         <!--        /> :  비어있는. 열고 닫기-->
     </resultMap>
+<!--    mysql 이 실행되고 있는 변수 - 세션과 같다-->
     <update id="setLoginUserId">
         # 변수등록 = 파라미터
         SET @loginUserId=#{uId}
     </update>
+<!--    사용후 계속 되면 안되니까, Null 로 줌-->
     <update id="setLoginUserIdNull">
         # 변수 지우기
         SET @loginUserId=NULL;
     </update>
 
     <insert id="insertOne" parameterType="UserDto">
-        INSERT INTO users (u_id, pw, name, phone, img_path, email, birth, gender, address, detail_address)
-        VALUE (#{uId},#{pw},#{name},#{phone},#{imgPath},#{email},#{birth},#{gender},#{address},#{detailAddress})
+        INSERT INTO users (u_id, pw, name, phone, img_path, email, birth, gender, address, detail_address,status,email_check_code)
+        VALUE (#{uId},#{pw},#{name},#{phone},#{imgPath},#{email},#{birth},#{gender},#{address},#{detailAddress},#{status},#{emailCheckCode})
     </insert>
     <update id="updateOne" parameterType="UserDto"> <!-- 파라미터타입 적으면 자동완성 -->
         UPDATE users SET pw=#{pw},
@@ -48,6 +68,9 @@
     <update id="updatePwByUId" parameterType="UserDto">
         UPDATE users SET pw=#{pw} WHERE u_id=#{uId};
     </update>
+    <update id="updateStatusByUidAndEmailCheckCode">
+        UPDATE users SET status=#{status} WHERE u_id=#{uId} AND email_check_code=#{emailCheckCode}
+    </update>
     <delete id="deleteByUIdAndPw" parameterType="UserDto">
         DELETE FROM users WHERE u_id=#{uId} AND pw=#{pw}
     </delete>
@@ -58,7 +81,7 @@
     <select id="findByUIdAndPw" resultMap="UserMap">
         SELECT * FROM users WHERE u_id=#{uId} AND pw=#{pw}
     </select>
-    <select id="findUIdByEmailAndPhoneAndName" resultType="java.lang.String">
+    <select id="findUIdByEmailAndPhoneAndName" resultMap="UserMap">
         SELECT u_id FROM users WHERE email=#{email} AND phone=#{phone} AND name=#{name}
     </select>
 

@@ -25,8 +25,11 @@ public class UserServiceImp implements UserService {
     }
 
     @Override
-    public UserDto detail(String uId) {
-        return userMapper.findByUId(uId);
+    public UserDto detail(String uId,String loginUserId) {
+        userMapper.setLoginUserId(loginUserId);
+        UserDto detail=userMapper.findByUId(uId);
+        userMapper.setLoginUserIdNull(); // 언젠간 null 을 해줘야 한다. // lazy 조인을 하면 불러오기전에 null 이 되서, 로그인유저가 안불러와진다.
+        return detail;
     }
 
     @Override
@@ -43,5 +46,11 @@ public class UserServiceImp implements UserService {
     @Override
     public int dropout(UserDto user) {
         return userMapper.deleteByUIdAndPw(user);
+    }
+
+    @Override
+    public int modifyEmailCheck(UserDto user) {
+        int modifyEmailCheck= userMapper.updateStatusByUidAndEmailCheckCode(user);
+        return modifyEmailCheck;
     }
 }

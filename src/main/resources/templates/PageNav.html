@@ -1,0 +1,34 @@
+<ul class="pagination justify-content-center">
+  <li class="page-item">
+    <a class="page-link"
+       th:classappend="${!page.isFirstPage ? '':'disabled'}"
+       th:href="@{''(pageNum=1,pageSize=10,order=${param.order},direct=${param.direct},searchField=${param.searchField},searchValue=${param.searchValue})}">First</a>
+  </li>
+  <li class="page-item">
+    <a class="page-link"
+       th:classappend="${page.isHasPreviousPage? '':'disabled'}"
+       th:href="@{''(pageNum=${page.prePage},order=${param.order},pageSize=10,direct=${param.direct},searchField=${param.searchField},searchValue=${param.searchValue})}">Prev</a>
+  </li>
+
+  <li th:each="p:${page.navigatepageNums}" class="page-item">
+    <a class="page-link"
+       th:classappend="${p==page.pageNum? 'active':''}"
+       th:href="@{''(pageNum=${p},pageSize=10,order=${param.order},direct=${param.direct},searchField=${param.searchField},searchValue=${param.searchValue})}"
+       th:text="${p}"
+    ></a>
+    <!--                <a class="page-link" th:href="@{''(pageNum=1,pageSize=10)}">1</a>-->
+  </li>
+
+  <!-- 버튼을 누를때마다 th:href 에 파라미터들이 url 파라미터로 전달이 되고,  -->
+  <li class="page-item">
+    <a class="page-link"
+       th:classappend="${page.isHasNextPage? '':'disabled'}"
+       th:href="@{''(pageNum=${page.nextPage},order=${param.order},pageSize=10,direct=${param.direct},searchField=${param.searchField},searchValue=${param.searchValue})}">Next</a>
+  </li>
+
+  <li class="page-item">
+    <a class="page-link"
+       th:classappend="${!page.isLastPage? '':'disabled'}"
+       th:href="@{''(pageNum=${page.pages},order=${param.order},pageSize=10,direct=${param.direct},searchField=${param.searchField},searchValue=${param.searchValue})}">Last</a>
+  </li>
+</ul>

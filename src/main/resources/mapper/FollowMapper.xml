@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.acorn.springboardstudy.mapper.FollowMapper"> <!-- userMap  -->
+    <resultMap id="UserMap" type="UserDto">
+        <id column="u_id" property="uId"/> <!--column : pk -->
+        <result column="name" property="name"/>
+        <result column="pw" property="pw"/>
+        <result column="phone" property="phone"/>
+        <result column="email" property="email"/>
+        <result column="post_time" property="postTime"/>
+        <!-- 테이블의 칼럼명 post_time 을 맵핑할 타입 DTO 의 필드명 postTime 으로 변경 (이름을 동일하게 맞춰준다.) -->
+        <result column="birth" property="birth"/>
+        <result column="img_path" property="imgPath"/>
+        <result column="address" property="address"/>
+        <result column="detail_address" property="detailAddress"/>
+        <result column="permission" property="permission"/>
+        <result column="following" property="following"/>
+        <!--        /> :  비어있는. 열고 닫기-->
+    </resultMap>
+
+    <insert id="insertOne" parameterType="FollowDto">
+        INSERT INTO follows (from_id, to_id) VALUES (#{fromId},#{toId})
+    </insert>
+
+    <delete id="deleteByFromIdAndToId" parameterType="FollowDto">
+        DELETE FROM follows WHERE from_id=#{fromId} AND to_id=#{toId}
+    </delete>
+
+
+    <select id="findByFromId" resultMap="UserMap">
+        SELECT u.*,(true) following
+            FROM follows f LEFT JOIN users u ON f.to_id=u.u_id
+            WHERE from_id=#{uId}
+    </select>
+<!--    나를 구독하는 사람들 // 로그인한 유저가 나이고, 영희가 from_id, 로그인한 사람은 to_id
+        🍒mysql 에서 1 은 true, 0 은 false -->
+    <select id="findByToId" resultMap="UserMap">
+        SELECT u.*,(SELECT COUNT(*) FROM follows WHERE from_id=@loginUserId AND to_id=f.from_id) following
+        FROM follows f LEFT JOIN users u ON f.from_id=u.u_id
+            WHERE to_id=#{uId}
+    </select>
+    <select id="findByToIdAndFromIdIsLoginUserId" resultType="boolean"> <!-- 호출할때 조인. 1이면 true, 0이면 false -->
+        SELECT COUNT(*) FROM follows WHERE from_id=@loginUserId AND to_id=#{uId}
+    </select>
+    <!-- WHERE A AND B => A,B 조건이 둘다 맞는 경우 -->
+
+</mapper>

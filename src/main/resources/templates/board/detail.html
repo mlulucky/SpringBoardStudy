@@ -184,9 +184,6 @@
                             <input type="text" name="uId" readonly class="form-control" placeholder="글쓴이">
                             <label>글쓴이</label>
                         </p>
-                        <p>
-                            <img name="imgPath" class="img-thumbnail" src="" alt="댓글 이미지"> <!-- 원본 이미지 -->
-                        </p>
                         <p class="form-floating">
                             <input type="text" name="parentBrId" readonly class="form-control" placeholder="참조하는 부모 댓글">
                             <label>참조하는 부모 댓글</label>
@@ -219,7 +216,7 @@
         removeReplyBtn.addEventListener("click", removeReply); // click 이벤트가 발생하면 ~ 를 실행
 
         async function removeReply() {
-            let c = confirm("삭제 하시겠습니까?"); // 확인 : true // 취소 : false
+            let c = confirm("삭제 하시겠습니까?"); // confirm 함수 => 확인 : true // 취소 : false
             // console.log(c);
             let url = "/reply/handler.do";
             let data = new FormData(replyModifyForm);
@@ -246,7 +243,7 @@
             let url = "/reply/handler.do";
             const data = new FormData(replyModifyForm); // FormData : 데이터를 파라미터로 만들기위해 직렬화를 한다.
             // method GET,POST
-            // RESTAPI(ajax) PUT, DELETE, PATCH ... 호출하는데 restapi 이고 ajax 로만 생성된다.
+            // RESTAPI(ajax) PUT, DELETE, PATCH ... 호출하는게 restapi 이고 ajax 로만 생성된다.
             // => url 을 계속 바꾸는게 아니라 메소드만 바꿔서 url 의 상태를 바꿀 수 있다.
             const resp = await fetch(url, {method: "PUT", body: data}); // PUT : 수정한다(==POST) / body : url 요청할때 파라미터 정보가 들어가는 요청본문(요청헤더 - 주요정보가 들어가는)
             if (resp.status === 200) {
@@ -283,8 +280,8 @@
         replyInsertForm.onsubmit = registerReply;
 
         async function registerReply(e) { // 매개변수 e 를 받아야 한다.
-            e.preventDefault();
-            // multipart/form-data 로 지정된 form 은 new FormData(formNode) 객체를 생성해서 body 에 추가
+            e.preventDefault(); // ajax => form 에 버튼 submit 이벤트 막기
+            // multipart/form-data 로 지정된 form 은 new FormData(formNode) 객체를 생성해서 body 에 추가하면 파라미터가 전달이 된다.
             const data = new FormData(replyInsertForm);
             let url = "/reply/handler.do" // register:1(등록성공), 0(실패)
             const resp = await fetch(url, {method: "POST", body: data});  // => blob 데이터를 파라미터로 저장. 전송
@@ -313,7 +310,7 @@
                 replyModifyForm.querySelectorAll("[name]").forEach((input) => { // => 🍏이미지태그의 value 에 이미지가 들어온다
                     let key = input.name;
                     // 🍉input.value : input type='file' 에는 value 가 없음
-                    // json 의 key 값이 있는것만 대입 (file 이미지 제외)
+                    // json 의 key 값이 있는것만 대입
                     if (key in json) {
                         if (key === "imgPath") { // 🍏이미지 input 태그의 value => name 으로 이미지 불러오기
                             input.src = json[key]; // input 요소

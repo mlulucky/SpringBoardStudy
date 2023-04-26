@@ -10,9 +10,55 @@
 
     <div layout:fragment="content">
         <h1 class="my-4">유저 상세 페이지</h1>
-        <p th:text="${user}"></p>
+<!--        <p th:text="${user.followings}"></p>-->
+<!--        <p th:text="${user.followers}"></p>-->
 
-        <p>
+        <nav>
+            <div class="nav nav-tabs" id="nav-tab" role="tablist">
+                <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#followersNav" type="button" role="tab">
+                    팔로워
+                    <span th:text="${(user.followers!=null)?user.followers.size():0}"></span> <!-- 팔로우가 있으면, 팔로우 개수, 없으면 0 표시 -->
+                </button>
+                <button class="nav-link" data-bs-toggle="tab" data-bs-target="#followingsNav" type="button" role="tab">
+                    팔로잉
+                    <span th:text="${(user.followings!=null)?user.followings.size():0}"></span> <!-- 팔로우가 있으면, 팔로우 개수, 없으면 0 표시 -->
+                </button>
+                <button class="nav-link" data-bs-toggle="tab" data-bs-target="#boardsNav" type="button" role="tab">Contact</button>
+            </div>
+        </nav>
+        <div class="tab-content" id="nav-tabContent">
+            <div class="tab-pane fade show active" id="followersNav" role="tabpanel" aria-labelledby="nav-home-tab" tabindex="0">
+                <h2>팔로워 리스트</h2>
+                <div id="followerCont" class="list-group">
+                    <div th:each="f:${user.followers}" class="list-group-item d-flex justify-content-between align-items-center">
+                        <th:block th:include="/user/profile.html"></th:block> <!-- 폴더경로 -->
+                        <button th:onclick="toggleFollower([[${f.uId}]],this)" type="button" class="btn btn-outline-danger">삭제</button>
+<!--                        user02 true <button onclick="removeFollow("user02",'true',this)" type="button" class="btn btn-outline-danger">​삭제​</button>​-->
+                        <!-- this: 버튼 -->
+                    </div>
+                </div>
+            </div>
+            <div class="tab-pane fade" id="followingsNav" role="tabpanel" aria-labelledby="nav-profile-tab" tabindex="0">
+                <h2>팔로잉 리스트</h2>
+                <div id="followingCont" class="list-group">
+                    <div th:each="f:${user.followings}"
+                         class="list-group-item d-flex justify-content-between align-items-center">
+                        <th:block th:include="/user/profile"></th:block>
+                        <button
+                                th:onclick="toggleFollowing([[${f.uId}]],this)"
+                                type="button" class="btn btn-outline-primary active">팔로잉</button> <!-- this 는 버튼 자체 -->
+                    </div>
+                </div>
+
+
+
+            </div>
+            <div class="tab-pane fade" id="boardsNav" role="tabpanel" aria-labelledby="nav-contact-tab" tabindex="0">
+                <h2>게시글 리스트</h2>
+            </div>
+        </div>
+
+        <p th:if="${session.loginUser!=null}">
             <!-- http://localhost:8080/user/user01/update.do -->
             <a th:href="@{'/user/{uId}/modify.do'(uId=${user.getUId()})}">수정페이지</a>
         </p>

@@ -51,8 +51,9 @@ public class ReplyController {
     // 왜? 프록시객체가 만든 handler 들이 직렬화가 불가능해서
     // {"brId":119,"parentBrId":null,"postTime":"2023-04-07T00:11:41.000+00:00","updateTime":"2023-04-07T00:11:41.000+00:00","status":"PUBLIC","imgPath":"/public/img/reply/1680826301875_783.png","content":"테스트","likes":null,"replies":[],"uid":"mlucky","bid":4}
     @GetMapping("/{brId}/detail.do")
-    public @ResponseBody BoardReplyDto detail(@PathVariable int brId) { // @ResponseBody : (getter/setter 로 정의된)자바 객체 BoardReplyDto를 json 으로 파싱해준다. // BoardReplyDto 를 responsebody 로 보내겠다.
-        BoardReplyDto reply = boardReplyService.detail(brId);
+    public @ResponseBody BoardReplyDto detail(@PathVariable int brId) {
+        // @ResponseBody : (getter/setter 로 정의된)자바 객체 BoardReplyDto를 json 으로 파싱해준다. // BoardReplyDto 를 responsebody 로 보내겠다.
+        BoardReplyDto reply = boardReplyService.detail(brId); // 프록시 객체
 //        return new BoardReplyDto();
 //        return boardReplyService.detail(brId);
         log.info(reply);
@@ -110,7 +111,7 @@ public class ReplyController {
         // log.info(reply);
         // log.info(img.getOriginalFilename());
         // 이미지 파일 등록과 댓글 내용 수정코드
-        if (!img.isEmpty()) {
+        if (!img.isEmpty()) { // 이미지 파일이 있으면
             String[] contentTypes = img.getContentType().split("/");
             if (contentTypes[0].equals("image")) {
                 String fileName = System.currentTimeMillis() + "_" + (int) (Math.random() * 10000) + "." + contentTypes[1];
@@ -133,6 +134,9 @@ public class ReplyController {
         handlerDto.setModify(modify);
         return handlerDto;
     }
+
+
+
 
     @DeleteMapping("/handler.do")
     public @ResponseBody HandlerDto remove(
@@ -167,7 +171,7 @@ public class ReplyController {
         // /Users/moon/eunjeong/webAppStudy20230117/SpringBoardStudy/src/main/resources/static/public/img
         try {
             // 등록하기 전에 이미지 등록
-            if (img != null && !img.isEmpty()) { // img 파일을 선택하지 않아도 빈값(null- 객체없음)이 오지 않는다. // isEmpty : 객체는 있는데 파일이 없는 경우
+            if (img != null && !img.isEmpty()) { // img 파일을 선택하지 않아도 빈값(null- 객체없음)이 오지 않는다. // isEmpty : 객체는 있는데 파일이 없는 경우(파일이 안넘어옴)
                 String contentType = img.getContentType(); // 🔥 image/png or image/jpeg or text/xml or application/json
                 log.info(contentType);
                 String[] contentTypes = contentType.split("/");
@@ -175,7 +179,7 @@ public class ReplyController {
                     String fileName = System.currentTimeMillis() + "_" + (int) (Math.random() * 100000) + "." + contentTypes[1]; // png or jpeg
                     String imgPath = imgUploadPath + "/reply/" + fileName; // 물리적으로 서버컴퓨터에 저장되는 위치 // 또 쓸거라서 변수로 저장
                     Path path = Paths.get(imgPath); // 컴퓨터 위치를 저장하는것
-                    img.transferTo(path); // 물리적으로 저장하는거 🔥스프링보드스터디 폴더에 이미지 저장하는 거       // 이미지 저장 통신에 오류가 생길수있어 예외처리된다.
+                    img.transferTo(path); // 임시로 저장된 이미지를 물리적으로 존재하도록 이동  // 이미지 저장 통신에 오류가 생길수있어 예외처리된다.
                     reply.setImgPath("/public/img/reply/" + fileName);  // 사용자의 파일경로를 디비에 저장하려면 경로를 지정하는거 // 서버가 이미지를 배포하는 위치 (클라이언트가 이미지를 등록하는 위치)
                 }
                 // System.currentTimeMillis 현재시간 밀리세컨즈

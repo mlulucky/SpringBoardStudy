@@ -7,14 +7,14 @@
      -->
     <resultMap id="BoardReplyMap" type="BoardReplyDto">
         <id property="brId" column="br_id"/>
-        <id property="bId" column="b_id"/>
-        <id property="uId" column="u_id"/>
-        <id property="parentBrId" column="parent_br_id"/>
-        <id property="postTime" column="post_time"/>
-        <id property="updateTime" column="update_time"/>
-        <id property="imgPath" column="img_path"/>
-        <id property="status" column="status"/>
-        <id property="content" column="content"/>
+        <result property="bId" column="b_id"/>
+        <result property="uId" column="u_id"/>
+        <result property="parentBrId" column="parent_br_id"/>
+        <result property="postTime" column="post_time"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="imgPath" column="img_path"/>
+        <result property="status" column="status"/>
+        <result property="content" column="content"/>
         <association property="likes">
             <result property="like" column="like"/>
             <result property="bad" column="bad"/>

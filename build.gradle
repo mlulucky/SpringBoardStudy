@@ -26,6 +26,7 @@ dependencies {
 	implementation 'org.bgee.log4jdbc-log4j2:log4jdbc-log4j2-jdbc4.1:1.16'
 	implementation 'nz.net.ultraq.thymeleaf:thymeleaf-layout-dialect:3.2.0'
 	implementation 'com.github.pagehelper:pagehelper-spring-boot-starter:1.4.6'
+	implementation 'org.springframework.boot:spring-boot-starter-mail:3.0.4'
 	compileOnly 'org.projectlombok:lombok'
 	developmentOnly 'org.springframework.boot:spring-boot-devtools'
 	runtimeOnly 'com.mysql:mysql-connector-j'
@@ -34,6 +35,7 @@ dependencies {
 	implementation 'org.webjars.npm:bootstrap:5.2.3'
 	implementation 'org.webjars.npm:bootstrap-icons:1.10.3'
 	// webjars 사이트에서 gradle 선택 + bootstrap 검색 (부트스트랩다운)
+	// pagehelper
 	// complie 컴파일 할때 동작
 	// implementation 처음에 동작할때
 	// 타임리프 레이아웃 - 라이브러리 thymeleaf-layout-dialect

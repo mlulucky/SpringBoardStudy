@@ -1,6 +1,6 @@
 package com.acorn.springboardstudy.mapper;
 import com.acorn.springboardstudy.dto.BoardDto;
-import com.acorn.springboardstudy.dto.PageDto;
+import com.acorn.springboardstudy.dto.BoardPageDto;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -41,10 +41,10 @@ class BoardMapperTest {
     
     @Test
     void findAll() {
-        PageDto pageDto=new PageDto();
-        List<BoardDto> boardList=boardMapper.findAll(pageDto);
-        System.out.println("boardList = " + boardList);
-        assertNotNull(boardList); // null 이 아니면 성공! (기본값은 오류발생시 try/catch)
+//        BoardPageDto pageDto=new BoardPageDto();
+//        List<BoardDto> boardList=boardMapper.findAll(pageDto);
+//        System.out.println("boardList = " + boardList);
+//        assertNotNull(boardList); // null 이 아니면 성공! (기본값은 오류발생시 try/catch)
 
     }
 

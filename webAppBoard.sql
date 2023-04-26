@@ -15,29 +15,37 @@ USE webAppBoard;
 CREATE TABLE users
 (
     u_id           VARCHAR(255) PRIMARY KEY COMMENT '사용자 아이디',
-    pw             VARCHAR(255) NOT NULL COMMENT '비밀번호',
-    name           VARCHAR(255) NOT NULL COMMENT '이름',
-    phone          VARCHAR(20) UNIQUE NOT NULL COMMENT '전화번호',
+    pw             VARCHAR(255)                                    NOT NULL COMMENT '비밀번호',
+    name           VARCHAR(255)                                    NOT NULL COMMENT '이름',
+    phone          VARCHAR(20) UNIQUE                              NOT NULL COMMENT '전화번호',
     img_path       VARCHAR(255) COMMENT '프로필 이미지 경로',
-    email          VARCHAR(255) UNIQUE NOT NULL COMMENT '이메일',
-    post_time      TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '가입 시간',
-    birth          DATE NOT NULL COMMENT '생년월일',
+    email          VARCHAR(255) UNIQUE                             NOT NULL COMMENT '이메일',
+    post_time      TIMESTAMP                                       NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '가입 시간',
+    birth          DATE                                            NOT NULL COMMENT '생년월일',
     gender         ENUM ('FEMALE','MALE','NONE') COMMENT '성별',
     address        VARCHAR(255) COMMENT '주소',
     detail_address VARCHAR(255) COMMENT '상세주소',
-    permission     ENUM ('ADMIN','USER','SILVER','GOLD','PRIVATE') NOT NULL DEFAULT 'USER' COMMENT '권한'
+    permission     ENUM ('ADMIN','USER','SILVER','GOLD','PRIVATE') NOT NULL DEFAULT 'USER' COMMENT '권한',
+    # 이메일 체크에 필요한 상태
+    status     ENUM ('SIGNUP','EMAIL_CHECK','BLOCK','LEAVE','REPORT') NOT NULL DEFAULT 'SIGNUP' COMMENT '계정상태',
+    email_check_code VARCHAR(8) COMMENT '이메일 확인 코드'
 );
+#ALTER 테이블 구조를 바꾼다.
+# ALTER TABLE users ADD COLUMN status ENUM ('SIGNUP','EMAIL_CHECK','BLOCK','LEAVE','REPORT') NOT NULL DEFAULT 'SIGNUP' COMMENT '계정상태';
+# ALTER TABLE users ADD COLUMN email_check_code VARCHAR(8) COMMENT '이메일 확인 코드';
+
+
 
 CREATE TABLE boards
 (
     b_id        INT UNSIGNED AUTO_INCREMENT PRIMARY KEY COMMENT '게시글 아이디',
     u_id        VARCHAR(255) NOT NULL COMMENT '작성자 아이디',
-    post_time   TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '작성 시간',
-    update_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '최종 수정 시간',
+    post_time   TIMESTAMP    NOT NULL                      DEFAULT CURRENT_TIMESTAMP COMMENT '작성 시간',
+    update_time TIMESTAMP                                  DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '최종 수정 시간',
     status      ENUM ('PUBLIC','PRIVATE','REPORT','BLOCK') DEFAULT 'PUBLIC' COMMENT '상태',
     title       VARCHAR(255) COMMENT '제목',
-    content     TEXT NOT NULL COMMENT '내용',
-    view_count  INT UNSIGNED DEFAULT 0 COMMENT '조회수',
+    content     TEXT         NOT NULL COMMENT '내용',
+    view_count  INT UNSIGNED                               DEFAULT 0 COMMENT '조회수',
     FOREIGN KEY (u_id) REFERENCES users (u_id) ON DELETE CASCADE ON UPDATE CASCADE
 );
 CREATE TABLE board_replies
@@ -46,11 +54,11 @@ CREATE TABLE board_replies
     b_id         INT UNSIGNED NOT NULL COMMENT '게시글 아이디',
     u_id         VARCHAR(255) NOT NULL COMMENT '작성자 아이디',
     parent_br_id INT UNSIGNED COMMENT '부모 댓글 아이디(대댓글)',
-    post_time    TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '작성 시간',
-    update_time  TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '최종 수정 시간',
+    post_time    TIMESTAMP    NOT NULL                      DEFAULT CURRENT_TIMESTAMP COMMENT '작성 시간',
+    update_time  TIMESTAMP                                  DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '최종 수정 시간',
     status       ENUM ('PUBLIC','PRIVATE','REPORT','BLOCK') DEFAULT 'PUBLIC' COMMENT '상태',
     img_path     VARCHAR(255) COMMENT '이미지 경로',
-    content      MEDIUMTEXT NOT NULL COMMENT '내용',
+    content      MEDIUMTEXT   NOT NULL COMMENT '내용',
     FOREIGN KEY (b_id) REFERENCES boards (b_id) ON DELETE CASCADE ON UPDATE CASCADE,
     FOREIGN KEY (u_id) REFERENCES users (u_id) ON DELETE CASCADE ON UPDATE CASCADE,
     FOREIGN KEY (parent_br_id) REFERENCES board_replies (br_id) ON DELETE CASCADE ON UPDATE CASCADE
@@ -63,12 +71,12 @@ CREATE TABLE board_replies
 CREATE TABLE board_likes
 (
     bl_id  INT UNSIGNED AUTO_INCREMENT PRIMARY KEY COMMENT '게시글 좋아요 아이디',
-    b_id   INT UNSIGNED NOT NULL COMMENT '게시글 아이디',
-    u_id   VARCHAR(255) NOT NULL COMMENT '좋아요 누른 사용자 아이디',
+    b_id   INT UNSIGNED                                     NOT NULL COMMENT '게시글 아이디',
+    u_id   VARCHAR(255)                                     NOT NULL COMMENT '좋아요 누른 사용자 아이디',
     status ENUM ('LIKE','BAD','SAD','BEST','ANGRY','TIRED') NOT NULL COMMENT '좋아요 상태',
     UNIQUE (u_id, b_id),
     FOREIGN KEY (b_id) REFERENCES boards (b_id) ON DELETE CASCADE ON UPDATE CASCADE,
-    FOREIGN KEY (u_id) REFERENCES users(u_id) ON DELETE CASCADE ON UPDATE CASCADE
+    FOREIGN KEY (u_id) REFERENCES users (u_id) ON DELETE CASCADE ON UPDATE CASCADE
 );
 #댓글에 좋아요하는 테이블
 # FROM boards NATUAL JOIN users
@@ -76,9 +84,9 @@ CREATE TABLE board_likes
 # FROM boards INNER JOIN users ON boards.u_id=users.id
 CREATE TABLE reply_likes
 (
-    rl_id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY COMMENT '댓글 좋아요 아이디',
-    br_id INT UNSIGNED NOT NULL COMMENT '댓글 아이디',
-    u_id VARCHAR(255) NOT NULL COMMENT '좋아요 누른 사용자 아이디',
+    rl_id  INT UNSIGNED AUTO_INCREMENT PRIMARY KEY COMMENT '댓글 좋아요 아이디',
+    br_id  INT UNSIGNED                                     NOT NULL COMMENT '댓글 아이디',
+    u_id   VARCHAR(255)                                     NOT NULL COMMENT '좋아요 누른 사용자 아이디',
     status ENUM ('LIKE','BAD','SAD','BEST','ANGRY','TIRED') NOT NULL COMMENT '좋아요 상태',
     UNIQUE (u_id, br_id),
     FOREIGN KEY (br_id) REFERENCES board_replies (br_id) ON DELETE CASCADE ON UPDATE CASCADE,
@@ -91,8 +99,8 @@ CREATE TABLE reply_likes
 #board_imgs.img_path : "참새3참새3참새3참새@#ㄴㅇ_ㅇㅋㄹㄴ3참새3참새3참새3참새3참새3참새3참새3참새3참새3참새3참새3참새3참새3참새3참새3참새3참새3참새3참새3참새3참새3.jpeg"
 CREATE TABLE board_imgs
 (
-    bi_id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY COMMENT '게시글 이미지 아이디',
-    b_id INT UNSIGNED NOT NULL COMMENT '게시글 아이디',
+    bi_id    INT UNSIGNED AUTO_INCREMENT PRIMARY KEY COMMENT '게시글 이미지 아이디',
+    b_id     INT UNSIGNED NOT NULL COMMENT '게시글 아이디',
     img_path VARCHAR(255) NOT NULL COMMENT '이미지 경로',
     FOREIGN KEY (b_id) REFERENCES boards (b_id) ON DELETE CASCADE ON UPDATE CASCADE
 );
@@ -108,9 +116,9 @@ CREATE TABLE hashtags
 CREATE TABLE board_hashtags
 (
     bh_id INT UNSIGNED PRIMARY KEY AUTO_INCREMENT COMMENT '보드 해시태그 pk',
-    b_id INT UNSIGNED COMMENT '게시글 아이디',
-    tag VARCHAR(255) NOT NULL COMMENT '태그 내용',
-    UNIQUE (b_id,tag) COMMENT '게시글에 똑같은 태그가 등록되지 않도록',
+    b_id  INT UNSIGNED COMMENT '게시글 아이디',
+    tag   VARCHAR(255) NOT NULL COMMENT '태그 내용',
+    UNIQUE (b_id, tag) COMMENT '게시글에 똑같은 태그가 등록되지 않도록',
     FOREIGN KEY (b_id) REFERENCES boards (b_id) ON DELETE CASCADE ON UPDATE CASCADE,
     FOREIGN KEY (tag) REFERENCES hashtags (tag) ON DELETE CASCADE ON UPDATE CASCADE
 );
@@ -119,63 +127,72 @@ CREATE TABLE reply_hashtags
 (
     rh_id INT UNSIGNED PRIMARY KEY AUTO_INCREMENT COMMENT '댓글 해시태그 pk',
     br_id INT UNSIGNED COMMENT '댓글 아이디',
-    tag VARCHAR(255) NOT NULL COMMENT '태그 내용',
-    UNIQUE (br_id,tag) COMMENT '댓글에 똑같은 태그가 등록되지 않도록',
+    tag   VARCHAR(255) NOT NULL COMMENT '태그 내용',
+    UNIQUE (br_id, tag) COMMENT '댓글에 똑같은 태그가 등록되지 않도록',
     FOREIGN KEY (br_id) REFERENCES board_replies (br_id) ON DELETE CASCADE ON UPDATE CASCADE,
     FOREIGN KEY (tag) REFERENCES hashtags (tag) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
+#팔로잉 팔로워
+CREATE TABLE follows
+(
+    f_id        INT UNSIGNED AUTO_INCREMENT PRIMARY KEY COMMENT '팔로우 아이디',
+    from_id     VARCHAR(255) NOT NULL COMMENT '팔로워 아이디',
+    to_id       VARCHAR(255) NOT NULL COMMENT '팔로잉 아이디',
+    follow_time TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '팔로우한 시간',
+    UNIQUE (from_id, to_id),
+    FOREIGN KEY (from_id) REFERENCES users (u_id) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (to_id) REFERENCES users (u_id) ON DELETE CASCADE ON UPDATE CASCADE
+);
 
 
 -- users 테이블에 더미 데이터 생성
 INSERT INTO users(u_id, pw, name, phone, email, birth, gender, address, detail_address, permission)
-VALUES
-    ('user01', '1234', '김철수', '01012345678', 'user01@gmail.com', '1990-01-01', 'MALE', '서울특별시', '강남구', 'USER'),
-    ('user02', '1234', '이영희', '01087654321', 'user02@gmail.com', '1992-03-02', 'FEMALE', '서울특별시', '관악구', 'USER'),
-    ('user03', '1234', '박민수', '01011112222', 'user03@gmail.com', '1995-07-03', 'MALE', '경기도', '성남시', 'SILVER'),
-    ('user04', '1234', '홍길동', '01033334444', 'user04@gmail.com', '1997-11-04', 'MALE', '서울특별시', '중구', 'GOLD'),
-    ('user05', '1234', '임성호', '01055556666', 'user05@gmail.com', '2000-05-05', 'MALE', '서울특별시', '송파구', 'PRIVATE'),
-    ('user06', '1234', '이미라', '01077778888', 'user06@gmail.com', '2002-09-06', 'FEMALE', '서울특별시', '용산구', 'USER'),
-    ('user07', '1234', '김미나', '01099990000', 'user07@gmail.com', '1988-11-07', 'FEMALE', '서울특별시', '마포구', 'USER'),
-    ('user08', '1234', '장기용', '01022223333', 'user08@gmail.com', '1985-06-08', 'MALE', '서울특별시', '강서구', 'USER'),
-    ('user09', '1234', '송민주', '01044445555', 'user09@gmail.com', '1979-09-09', 'FEMALE', '서울특별시', '서초구', 'SILVER'),
-    ('user10', '1234', '이준호', '01066667777', 'user10@gmail.com', '1998-01-10', 'MALE', '서울특별시', '성동구', 'GOLD'),
-    ('user11', '1234', '김주원', '01088889999', 'user11@gmail.com', '2003-04-11', 'MALE', '서울특별시', '강동구', 'PRIVATE'),
-    ('user12', '1234', '최다인', '01012121212', 'user12@gmail.com', '1994-12-12', 'FEMALE', '서울특별시', '노원구', 'USER'),
-    ('user13', '1234', '이현우', '01013131313', 'user13@gmail.com', '1991-03-13', 'MALE', '경기도', '고양시', 'USER'),
-    ('user14', '1234', '서영석', '01014141414', 'user14@gmail.com', '1996-08-14', 'MALE', '경기도', '용인시', 'USER'),
-    ('user15', '1234', '임현아', '01015151515', 'user15@gmail.com', '1998-11-15', 'FEMALE', '서울특별시', '강남구', 'SILVER'),
-    ('user16', '1234', '김민수', '01016161616', 'user16@gmail.com', '1985-02-16', 'MALE', '서울특별시', '관악구', 'GOLD'),
-    ('user17', '1234', '김유진', '01017171717', 'user17@gmail.com', '1994-05-17', 'FEMALE', '서울특별시', '강서구', 'USER'),
-    ('user18', '1234', '박세진', '01018181818', 'user18@gmail.com', '2000-07-18', 'MALE', '서울특별시', '중구', 'USER'),
-    ('user19', '1234', '장미희', '01019191919', 'user19@gmail.com', '1989-09-19', 'FEMALE', '서울특별시', '송파구', 'PRIVATE'),
-    ('user20', '1234', '이선규', '01020202020', 'user20@gmail.com', '1992-11-20', 'MALE', '서울특별시', '용산구', 'USER');
+VALUES ('user01', '1234', '김철수', '01012345678', 'user01@gmail.com', '1990-01-01', 'MALE', '서울특별시', '강남구', 'USER'),
+       ('user02', '1234', '이영희', '01087654321', 'user02@gmail.com', '1992-03-02', 'FEMALE', '서울특별시', '관악구', 'USER'),
+       ('user03', '1234', '박민수', '01011112222', 'user03@gmail.com', '1995-07-03', 'MALE', '경기도', '성남시', 'SILVER'),
+       ('user04', '1234', '홍길동', '01033334444', 'user04@gmail.com', '1997-11-04', 'MALE', '서울특별시', '중구', 'GOLD'),
+       ('user05', '1234', '임성호', '01055556666', 'user05@gmail.com', '2000-05-05', 'MALE', '서울특별시', '송파구', 'PRIVATE'),
+       ('user06', '1234', '이미라', '01077778888', 'user06@gmail.com', '2002-09-06', 'FEMALE', '서울특별시', '용산구', 'USER'),
+       ('user07', '1234', '김미나', '01099990000', 'user07@gmail.com', '1988-11-07', 'FEMALE', '서울특별시', '마포구', 'USER'),
+       ('user08', '1234', '장기용', '01022223333', 'user08@gmail.com', '1985-06-08', 'MALE', '서울특별시', '강서구', 'USER'),
+       ('user09', '1234', '송민주', '01044445555', 'user09@gmail.com', '1979-09-09', 'FEMALE', '서울특별시', '서초구', 'SILVER'),
+       ('user10', '1234', '이준호', '01066667777', 'user10@gmail.com', '1998-01-10', 'MALE', '서울특별시', '성동구', 'GOLD'),
+       ('user11', '1234', '김주원', '01088889999', 'user11@gmail.com', '2003-04-11', 'MALE', '서울특별시', '강동구', 'PRIVATE'),
+       ('user12', '1234', '최다인', '01012121212', 'user12@gmail.com', '1994-12-12', 'FEMALE', '서울특별시', '노원구', 'USER'),
+       ('user13', '1234', '이현우', '01013131313', 'user13@gmail.com', '1991-03-13', 'MALE', '경기도', '고양시', 'USER'),
+       ('user14', '1234', '서영석', '01014141414', 'user14@gmail.com', '1996-08-14', 'MALE', '경기도', '용인시', 'USER'),
+       ('user15', '1234', '임현아', '01015151515', 'user15@gmail.com', '1998-11-15', 'FEMALE', '서울특별시', '강남구', 'SILVER'),
+       ('user16', '1234', '김민수', '01016161616', 'user16@gmail.com', '1985-02-16', 'MALE', '서울특별시', '관악구', 'GOLD'),
+       ('user17', '1234', '김유진', '01017171717', 'user17@gmail.com', '1994-05-17', 'FEMALE', '서울특별시', '강서구', 'USER'),
+       ('user18', '1234', '박세진', '01018181818', 'user18@gmail.com', '2000-07-18', 'MALE', '서울특별시', '중구', 'USER'),
+       ('user19', '1234', '장미희', '01019191919', 'user19@gmail.com', '1989-09-19', 'FEMALE', '서울특별시', '송파구', 'PRIVATE'),
+       ('user20', '1234', '이선규', '01020202020', 'user20@gmail.com', '1992-11-20', 'MALE', '서울특별시', '용산구', 'USER');
 
 INSERT INTO boards(u_id, title, content)
-VALUES
-    ('user01', '첫 번째 글입니다.', '안녕하세요. 첫 번째 글입니다.'),
-    ('user02', '두 번째 글입니다.', '안녕하세요. 두 번째 글입니다.'),
-    ('user03', '세 번째 글입니다.', '안녕하세요. 세 번째 글입니다.'),
-    ('user04', '네 번째 글입니다.', '안녕하세요. 네 번째 글입니다.'),
-    ('user05', '다섯 번째 글입니다.', '안녕하세요. 다섯 번째 글입니다.'),
-    ('user06', '여섯 번째 글입니다.', '안녕하세요. 여섯 번째 글입니다.'),
-    ('user07', '일곱 번째 글입니다.', '안녕하세요. 일곱 번째 글입니다.'),
-    ('user08', '여덟 번째 글입니다.', '안녕하세요. 여덟 번째 글입니다.'),
-    ('user09', '아홉 번째 글입니다.', '안녕하세요. 아홉 번째 글입니다.'),
-    ('user10', '열 번째 글입니다.', '안녕하세요. 열 번째 글입니다.'),
-    ('user11', '열한 번째 글입니다.', '안녕하세요. 열한 번째 글입니다.'),
-    ('user12', '열두 번째 글입니다.', '안녕하세요. 열두 번째 글입니다.'),
-    ('user13', '열세 번째 글입니다.', '안녕하세요. 열세 번째 글입니다.'),
-    ('user14', '열네 번째 글입니다.', '안녕하세요. 열네 번째 글입니다.'),
-    ('user15', '열다섯 번째 글입니다.', '안녕하세요. 열다섯 번째 글입니다.'),
-    ('user16', '열여섯 번째 글입니다.', '안녕하세요. 열여섯 번째 글입니다.'),
-    ('user17', '열일곱 번째 글입니다.', '안녕하세요. 열일곱 번째 글입니다.'),
-    ('user18', '열여덟 번째 글입니다.', '안녕하세요. 열여덟 번째 글입니다.'),
-    ('user19', '열아홉 번째 글입니다.', '안녕하세요. 열아홉 번째 글입니다.'),
-    ('user20', '스무 번째 글입니다.', '안녕하세요. 스무 번째 글입니다.');
+VALUES ('user01', '첫 번째 글입니다.', '안녕하세요. 첫 번째 글입니다.'),
+       ('user02', '두 번째 글입니다.', '안녕하세요. 두 번째 글입니다.'),
+       ('user03', '세 번째 글입니다.', '안녕하세요. 세 번째 글입니다.'),
+       ('user04', '네 번째 글입니다.', '안녕하세요. 네 번째 글입니다.'),
+       ('user05', '다섯 번째 글입니다.', '안녕하세요. 다섯 번째 글입니다.'),
+       ('user06', '여섯 번째 글입니다.', '안녕하세요. 여섯 번째 글입니다.'),
+       ('user07', '일곱 번째 글입니다.', '안녕하세요. 일곱 번째 글입니다.'),
+       ('user08', '여덟 번째 글입니다.', '안녕하세요. 여덟 번째 글입니다.'),
+       ('user09', '아홉 번째 글입니다.', '안녕하세요. 아홉 번째 글입니다.'),
+       ('user10', '열 번째 글입니다.', '안녕하세요. 열 번째 글입니다.'),
+       ('user11', '열한 번째 글입니다.', '안녕하세요. 열한 번째 글입니다.'),
+       ('user12', '열두 번째 글입니다.', '안녕하세요. 열두 번째 글입니다.'),
+       ('user13', '열세 번째 글입니다.', '안녕하세요. 열세 번째 글입니다.'),
+       ('user14', '열네 번째 글입니다.', '안녕하세요. 열네 번째 글입니다.'),
+       ('user15', '열다섯 번째 글입니다.', '안녕하세요. 열다섯 번째 글입니다.'),
+       ('user16', '열여섯 번째 글입니다.', '안녕하세요. 열여섯 번째 글입니다.'),
+       ('user17', '열일곱 번째 글입니다.', '안녕하세요. 열일곱 번째 글입니다.'),
+       ('user18', '열여덟 번째 글입니다.', '안녕하세요. 열여덟 번째 글입니다.'),
+       ('user19', '열아홉 번째 글입니다.', '안녕하세요. 열아홉 번째 글입니다.'),
+       ('user20', '스무 번째 글입니다.', '안녕하세요. 스무 번째 글입니다.');
 
 
-INSERT INTO board_replies(b_id,u_id, content)
+INSERT INTO board_replies(b_id, u_id, content)
 VALUES (1, 'user01', '첫 번째 글에 대한 1댓글입니다.'),
        (1, 'user01', '첫 번째 글에 대한 댓글 2번째입니다.'),
        (1, 'user01', '첫 번째 글에 대한 댓글 3번째입니다.'),
@@ -323,19 +340,117 @@ VALUES ('홍대'),
        ('acornacademy'),
        ('목요일');
 INSERT INTO board_hashtags (b_id, tag)
-VALUES (1,'홍대'),
-       (2,'홍대'),
-       (3,'홍대'),
-       (4,'홍대'),
-       (5,'홍대'),
-       (7,'홍대'),
-       (10,'홍대'),
-       (11,'홍대'),
-       (1,'홍대맛집'),
-       (1,'한국'),
-       (1,'food'),
-       (1,'travel'),
-       (1,'먹심'),
-       (2,'홍대놀이터'),
-       (2,'홍대맛집'),
-       (2,'수요일');
+VALUES (1, '홍대'),
+       (2, '홍대'),
+       (3, '홍대'),
+       (4, '홍대'),
+       (5, '홍대'),
+       (7, '홍대'),
+       (10, '홍대'),
+       (11, '홍대'),
+       (1, '홍대맛집'),
+       (1, '한국'),
+       (1, 'food'),
+       (1, 'travel'),
+       (1, '먹심'),
+       (2, '홍대놀이터'),
+       (2, '홍대맛집'),
+       (2, '수요일');
+
+INSERT INTO follows(from_id, to_id)
+VALUES ('user01', 'user02'),
+       ('user01', 'user03'),
+       ('user01', 'user04'),
+       ('user01', 'user05'),
+       ('user01', 'user06'),
+       ('user02', 'user01'),
+       ('user02', 'user03'),
+       ('user02', 'user05'),
+       ('user02', 'user06'),
+       ('user02', 'user07'),
+       ('user03', 'user01'),
+       ('user03', 'user04'),
+       ('user03', 'user05'),
+       ('user03', 'user06'),
+       ('user03', 'user07'),
+       ('user04', 'user01'),
+       ('user04', 'user03'),
+       ('user04', 'user05'),
+       ('user04', 'user07'),
+       ('user04', 'user08'),
+       ('user05', 'user01'),
+       ('user05', 'user03'),
+       ('user05', 'user04'),
+       ('user05', 'user07'),
+       ('user05', 'user10'),
+       ('user06', 'user02'),
+       ('user06', 'user03'),
+       ('user06', 'user04'),
+       ('user06', 'user05'),
+       ('user06', 'user07'),
+       ('user07', 'user02'),
+       ('user07', 'user05'),
+       ('user07', 'user06'),
+       ('user07', 'user08'),
+       ('user07', 'user10'),
+       ('user08', 'user04'),
+       ('user08', 'user05'),
+       ('user08', 'user06'),
+       ('user08', 'user09'),
+       ('user08', 'user10'),
+       ('user09', 'user03'),
+       ('user09', 'user05'),
+       ('user09', 'user06'),
+       ('user09', 'user07'),
+       ('user09', 'user08'),
+       ('user10', 'user01'),
+       ('user10', 'user02'),
+       ('user10', 'user05'),
+       ('user10', 'user08'),
+       ('user10', 'user09');
+
+CREATE TABLE chat_rooms
+(
+    cr_id        INT UNSIGNED AUTO_INCREMENT PRIMARY KEY COMMENT '채팅방 아이디',
+    u_id         VARCHAR(255) NOT NULL COMMENT '채팅방 생성자 아이디',
+    name         VARCHAR(255) NOT NULL COMMENT '채팅방 이름',
+    description  TEXT COMMENT '채팅방 설명',
+    post_time    TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '채팅방 생성 시간',
+    update_time TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '채팅방 최근 업데이트 시간'
+);
+
+CREATE TABLE chat_messages
+(
+    cm_id     INT UNSIGNED AUTO_INCREMENT PRIMARY KEY COMMENT '메시지 아이디',
+    cr_id     INT UNSIGNED                  NOT NULL COMMENT '채팅방 아이디',
+    u_id      VARCHAR(255)                  NOT NULL COMMENT '송신자 아이디',
+    nickname  VARCHAR(255)                  NOT NULL COMMENT '송신자 닉네임',
+    content   TEXT                          NOT NULL COMMENT '메시지 내용',
+    status    ENUM ('ENTER','LEAVE','CHAT') NOT NULL COMMENT '메세지 상태 상태',
+    post_time TIMESTAMP                     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '메시지 전송 시간',
+    FOREIGN KEY (cr_id) REFERENCES chat_rooms (cr_id) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (u_id) REFERENCES users (u_id) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+-- chat_rooms
+INSERT INTO chat_rooms(u_id, name, post_time)
+VALUES
+    ('user01', 'Room1', '2022-01-01 12:00:00'),
+    ('user02', 'Room2', '2022-01-02 13:00:00'),
+    ('user03', 'Room3', '2022-01-03 14:00:00'),
+    ('user04', 'Room4', '2022-01-04 15:00:00'),
+    ('user05', 'Room5', '2022-01-05 16:00:00');
+
+-- chat_messages
+INSERT INTO chat_messages(cr_id, u_id, nickname, content, status)
+VALUES
+    (1, 'user01', '유저1', '안녕하세요!', 'ENTER'),
+    (1, 'user02', '유저2', '안녕하세요~', 'ENTER'),
+    (1, 'user01', '유저1', '오늘 날씨가 참 좋네요.', 'CHAT'),
+    (1, 'user02', '유저2', '네, 정말 좋은 날씨입니다.', 'CHAT'),
+    (1, 'user01', '유저1', '그렇군요.', 'CHAT'),
+    (1, 'user01', '유저1', '잠깐만요. 제가 문서 작업 중인데 잠시 쉬고 싶어서 나갔다가 다시 들어왔습니다.', 'LEAVE'),
+    (1, 'user01', '유저1', '다시 돌아왔습니다.', 'CHAT'),
+    (1, 'user02', '유저2', '어떤 문서 작업을 하고 있었나요?', 'CHAT'),
+    (1, 'user01', '유저1', '저희 회사의 신제품 출시 계획서를 작성하고 있었습니다.', 'CHAT'),
+    (1, 'user02', '유저2', '그런가요? 대단하십니다!', 'CHAT')

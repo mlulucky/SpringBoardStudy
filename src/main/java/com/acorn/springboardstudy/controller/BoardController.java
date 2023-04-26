@@ -2,10 +2,11 @@ package com.acorn.springboardstudy.controller;
 
 import com.acorn.springboardstudy.dto.BoardDto;
 import com.acorn.springboardstudy.dto.BoardImgDto;
-import com.acorn.springboardstudy.dto.PageDto;
+import com.acorn.springboardstudy.dto.BoardPageDto;
 import com.acorn.springboardstudy.dto.UserDto;
 import com.acorn.springboardstudy.service.BoardService;
-import lombok.AllArgsConstructor;
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
@@ -19,7 +20,6 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 @Controller // 컨트롤러 설정
@@ -40,35 +40,46 @@ public class BoardController {
 
     @GetMapping("/list.do")
     public String list(Model model,
-    // public @ResponseBody PageDto list(Model model,
                        @SessionAttribute(required = false)UserDto loginUser, // 🍉로그인 한사람만 리스트에 들어올수 있으니. 로그인안해도 들어올수 있게 required=false 로
-                       @ModelAttribute PageDto pageDto // 파라미터 정수 다 있어야지 페이지가 뜬다. 없으면 페이지 에러뜸 http://localhost:8080/board/list.do?page=1&offset=10&order=b_id&direct=asc
+                       @ModelAttribute BoardPageDto pageDto
                        ){ // Model 뷰에 객체를 전달
-//        log.info("pageDto = " + pageDto);
         List<BoardDto> boards;
-        boards=boardService.list(loginUser, pageDto); // 페이지를 불러올때, 페이징도 불러오기
-        model.addAttribute("page",pageDto);
-//        if(loginUser==null){  // 🍉로그인 안했을때
-//            boards=boardService.list();
-//        }else{
-//            boards=boardService.list(loginUser.getUId()); // 로그인한 유저 좋아요한 내역 불러오기
-//        }
-//        List<BoardDto> boards=boardService.list();
+//        PageHelper.startPage(pageDto.getPageNum(),pageDto.getPageSize(),"b_id DESC");
+        boards=boardService.list(loginUser,pageDto); // 페이지를 불러올때, 페이징도 불러오기
+        PageInfo<BoardDto> pageBoards=new PageInfo<>(boards); // PageInfo : 페이징 네비게이션을 해준다
+        model.addAttribute("page",pageBoards); // page.list 필드 == board
         model.addAttribute("boards",boards); // 뷰에 객체를 전달
         return "/board/list"; // 렌더할 뷰 (board 폴더 안에 list.html)
-        // return pageDto; // 🍒jackson 이 파라미터를 가져올때(파싱할때) 다 get 으로 가져온다. => startIndex 만 해도, getStartIndex 가 호출된다.
     }
 
     @GetMapping("/{tag}/tagList.do")
     public String tagList(
             @PathVariable String tag,
             Model model,
-            @SessionAttribute(required = false)UserDto loginUser // 🍉로그인 한사람만 리스트에 들어올수 있으니. 로그인안해도 들어올수 있게 required=false 로
+            @SessionAttribute(required = false)UserDto loginUser, // 🍉로그인 한사람만 리스트에 들어올수 있으니. 로그인안해도 들어올수 있게 required=false 로
+            BoardPageDto pageDto
     ){ // Model 뷰에 객체를 전달
         List<BoardDto> boards;
-        boards=boardService.tagList(tag,loginUser);
+        pageDto.setPageSize(4); // 보여지는 페이지 개수 4개
+        boards=boardService.tagList(tag,loginUser,pageDto); // tagList 에 매개변수들 보내기
         model.addAttribute("boards",boards); // 뷰에 객체를 전달
-        return "/board/list"; // 렌더할 뷰 (board 폴더 안에 list.html)
+        model.addAttribute("tag",tag);
+        return "/board/tagList"; // 렌더할 뷰 (board 폴더 안에 list.html)
+    }
+
+    @GetMapping("/{tag}/ajaxTagList.do")
+    public String ajaxTagList(
+            @PathVariable String tag,
+            Model model,
+            @SessionAttribute(required = false)UserDto loginUser, // 🍉로그인 한사람만 리스트에 들어올수 있으니. 로그인안해도 들어올수 있게 required=false 로
+            BoardPageDto pageDto
+    ){ // Model 뷰에 객체를 전달
+        List<BoardDto> boards;
+        pageDto.setPageSize(4); // 보여지는 페이지 개수 4개
+        boards=boardService.tagList(tag,loginUser,pageDto); // tagList 에 매개변수들 보내기
+        model.addAttribute("boards",boards); // 뷰에 객체를 전달
+        model.addAttribute("tag",tag);
+        return "/board/includeList"; // 렌더할 뷰 (board 폴더 안에 list.html)
     }
 
     //  ?bId=1  파라미터를 쿼리스트링으로 보내는건 올드
@@ -97,15 +108,15 @@ public class BoardController {
             @ModelAttribute BoardDto board, //🍉파라미터를 받아오는 것 (✨파라미터를 파싱해준다) // 보드 번호를 넘겨야 한다!! => board.getBId() 사용된다.
             // 이미지가 없을 수도 있어서 required = false // 파라미터로 안받아도 에러 안되게끔
 
-            // @RequestParam(value= "태그의 name")
+            // @RequestParam(name= "태그의 name")
             // delImgIds 배열이 int 타입인 이유 : input 태그(name="delImgId") 의 value 값(파라미터로 넘어온 값)이 biId, 숫자라서
             // 태그 name=delImgId 으로 넘어온 파라미터를 delImgIds 이름으로 받겠다~ // 체크박스 체크하면 th:value 값 보드이미지아이디가 넘어온다.
-            @RequestParam(value="delImgId", required = false) int [] delImgIds, // 삭제할 이미지 // img.biId 여러개
-            @RequestParam(value="delImgPath", required = false) String [] delImgPath, // 이미지 삭제에 필요한 이미지경로
-            @RequestParam(value="img", required = false) MultipartFile [] imgs, // 새로 등록할 이미지 // 이미지 등록에 사용할 이미지
-            @RequestParam(value="tag", required = false) List<String> tags, // 해시태그 등록
-            @RequestParam(value="delTag", required = false) List<String> delTags // 해시태그 삭제
-    ){
+            @RequestParam(name="delImgId", required = false) int [] delImgIds, // 삭제할 이미지 // img.biId 여러개
+            @RequestParam(name="delImgPath", required = false) String [] delImgPath, // 이미지 삭제에 필요한 이미지경로
+            @RequestParam(name="img", required = false) MultipartFile [] imgs, // 새로 등록할 이미지 // 이미지 등록에 사용할 이미지
+            @RequestParam(name="tag", required = false) List<String> tags, // 해시태그 등록
+            @RequestParam(name="delTag", required = false) List<String> delTags // 해시태그 삭제
+    ) throws IOException {
         // 🍉log.info(Arrays.toString(delImgIds)); // 값 잘 넘어오는지 확인 // Arrays.toString : 배열의 출력을 도와주는
         // 🍉db 에서 보드이미지는 지웠는데 참조하는 이미지(컴퓨터에 저장된 경로 Path path= Paths.get(uploadPath+"/board/"+fileName))를 지워야 한다.
         // => 넘긴게 짱구 번호지 짱구 이미지패스가 아니다. => 짱구의 이미지패스가 필요하다.
@@ -123,22 +134,44 @@ public class BoardController {
 //        |34    |21   |/public/img/board/1681175775739_99439.png |
 //        |------|-----|------------------------------------------|
         String redirectPath="redirect:/board/"+board.getBId()+"/modify.do"; // http://localhost:8080/board/21/modify.do
-        List<BoardImgDto> imgDtos=null;
 
+        List<BoardImgDto> imgDtos=null;  // 이미지 여러개를 담을 리스트
+        if(imgs!=null){ // null 아닌지 체크! => 이미지 저장하겠다.
+            imgDtos=new ArrayList<>();
+            // 이미지가 복수일때 반복문으로 가져오기!
+            for(MultipartFile img : imgs){
+                if(!img.isEmpty()){ // 이미지가 있으면~
+                    String[] contentTypes=img.getContentType().split("/"); // text/xml  application/json  image/png  image/jpg
+                    if(contentTypes[0].equals("image")){ // 이미지인지 확인~!
+                        String fileName=System.currentTimeMillis()+"_"+(int)(Math.random()*100000)+"."+contentTypes[1];
+                        Path path= Paths.get(uploadPath+"/board/"+fileName); // 실질적으로 저장되는 컴퓨터 물리적 위치 // uploadPath : /SpringBoardStudy/src/main/resources/static/public/img
+                        img.transferTo(path); // 오류 발생하면 아예 취소해버릴꺼라서 메서드에 500에러 위임! // 임시적으로 저장한 이미지를 물리적 위치로 저장
+                        BoardImgDto imgDto=new BoardImgDto();
+                        imgDto.setImgPath("/public/img/board/"+fileName); // 서버에 배포되는 경로_db 테이블 이미지 경로
+                        imgDtos.add(imgDto);
+                    }
+                }
+            }
+        }
+        board.setImgs(imgDtos); // null 일 수 도 있고, null 이 아닐수도 있다.
         int modify=0;
         try{
-            if(delImgIds!=null) imgDtos=boardService.imgList(delImgIds); // 삭제 전에 이미지 파일 경로를 받아옴
-            // 게시글 수정 + 이미지 수정
+            // 삭제 전에 삭제할 이미지 파일 경로를 받아옴
+            if(delImgIds!=null) imgDtos=boardService.imgList(delImgIds);
+            // 게시글 수정 + 이미지 수정 // 🍉db 에서 이미지 삭제
             modify=boardService.modify(board,delImgIds,tags,delTags);
         }catch (Exception e){
             log.error(e.getMessage());
         }
-        // 이미지가 db 에서 삭제가 된후에 파일을 삭제하겠다! ( // 서비스에서 삭제하는 경우에, 트랜잭션으로 원래는 db 는 롤백이 되지만(db 실행을 취소), 파일은 롤백이 안된다.)
+        // 🍉이미지가 db 에서 삭제가 된후에만 이미지 파일을 삭제하겠다!
+        // 서비스에서 삭제하는 경우에, 트랜잭션으로 원래는 db 는 롤백이 되지만(db 실행을 취소), 파일은 롤백이 안된다.)
+        // => 따라서 이미지 삭제를 서비스 db 로직과 컨트롤러를 분리해서 삭제하는게 좋다
+        // 🍉실제 이미지파일 삭제
         if(modify>0){ // 수정 성공
             if(imgDtos!=null) { // 삭제할 이미지가 있으면
                 for(BoardImgDto i : imgDtos){ // 삭제할 목록
                     File imgFile=new File(staticPath+i.getImgPath());
-                    if(imgFile.exists()) imgFile.delete();
+                    if(imgFile.exists()) imgFile.delete(); // 이미지 파일이 존재하면 삭제!
                 }
             }
             redirectPath="redirect:/board/list.do";
@@ -167,7 +200,7 @@ public class BoardController {
 //        log.info(img.getOriginalFilename());
 
         List<BoardImgDto> imgDtos=null;  // 이미지 여러개를 담을 리스트
-        if(imgs!=null){ // null 아닌지 체크!
+        if(imgs!=null){ // null 아닌지 체크! => 이미지 저장하겠다.
             imgDtos=new ArrayList<>();
             // 이미지가 복수일때 반복문으로 가져오기!
             for(MultipartFile img : imgs){
@@ -193,7 +226,7 @@ public class BoardController {
         }
         if(register>0){// 등록 성공
             redirectPage="redirect:/board/list.do";
-        }else { // 🍉게시글 등록 실패시 저장했던 파일 삭제
+        }else { // 🍉✨게시글 등록 실패시 저장했던 파일 삭제 => 수정도 동일하다
             if(imgDtos!=null){
                 for(BoardImgDto imgDto : imgDtos) {
                     File imgFile=new File(staticPath+ imgDto.getImgPath());
@@ -202,6 +235,8 @@ public class BoardController {
             }
         }
         return  redirectPage;
+
+
 //        register.html 에서 게시글 등록버튼을 눌렀을때, 로그인 유저와 글쓴이 유저가 다르면 다시 등록페이지로 이동되면서 메서드가 종료(컨트롤러에서 아래 코드가 실행이 안되고)
 //        유저가 같다면 컨트롤러의 그 아래 코드들이 실행
 //        가장아래에 return 되는 페이지는 board/register.do 가 아니라 다른 페이지로 수정할 예정

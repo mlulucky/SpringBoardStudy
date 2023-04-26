@@ -1,0 +1,90 @@
+<div class="col" th:each="b:${boards}">
+    <!--        <div class="col" th:each="b:${page.list}">-->
+    <div class="card"> <!-- boards 의 요소만큼을 반복해서 하나씩 배오기 (반복문) -->
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <!-- 오른쪽 끝으로 보내기 / stretch 속성으로 아이콘이 위로 올라간다 => 세로중아 맞추기 align-items-center -->
+            <div>
+                <th:block th:include="/user/profile" th:with="f=${b.user}"></th:block>
+            </div>
+            <!--                    드롭다운 메뉴-->
+            <th:block th:include="/board/dropDownMenu.html"></th:block>
+        </div> <!-- // 카드 header : 아이디, 이름, 작성일, 더보기 버튼 -->
+        <div class="card-body">
+            <span th:text="${b.bId}"></span>
+            <i class="bi bi-dot"></i>
+            <!-- 있을때만 이미지를 출력하겠다 th:if="${b.user.imgPath!=null}" -->
+            <small th:text="${#dates.format(b.postTime,'yyy-MM-dd')}"></small>
+            <!-- date.format(데이트객체, 포맷) 으로 날짜 예쁘게 수정하기 -->  <!-- b.postTime 자바객체 : Tue Mar 28 11:34:12 KST 2023 -->
+<!--            <img th:if="${b.user.imgPath!=null}"-->
+<!--                 th:src="@{'{path}'(path=${b.user.imgPath})}"-->
+<!--                 alt="프로필이미지"-->
+<!--                 style="width: 100px; object-fit: cover;" class="img-thumbnail">-->
+<!--            &lt;!&ndash; object-fit:cover - 사진비율 맞춰준다. &ndash;&gt;-->
+<!--            <strong class="ms-2" th:text="${b.user.uId}"></strong> &lt;!&ndash; margin-start &ndash;&gt;-->
+<!--            (<strong th:text="${b.user.name}"></strong>)-->
+<!--            <small class="text-muted">•</small>-->
+
+
+            <!-- 이미지 -->
+            <!--                    b.imgs 가 null 이 아닐때만 출력-->
+            <!--                    id , data-bs-target : 슬라이드 적용대상-->
+            <div th:if="${b.imgs!=null}" th:id="'carousel'+${b.bId}" class="carousel slide" data-bs-ride="carousel">
+                <div class="carousel-inner">
+                    <!--                            🍉 글쓴이가 쓴글은 수정하기 버튼 보이게 하기!-->
+                    <!--                           th:classappend="${state.first}?'active':'' =>  이미지가 첫번째이면 active 클래스를 주고 아니면 아무것도 안준다.-->
+                    <div class="carousel-item" th:each="img,state : ${b.imgs}"
+                         th:classappend="${state.first}?'active':''">
+                        <img th:src="@{'{path}'(path=${img.imgPath})}" class="d-block w-100" alt="게시글 이미지">
+                        <!--                                <p th:text="${state}"></p>-->
+                    </div>
+                    <!-- state : 이미지 상태가 있다. -->  <!-- forEach -->
+                    <!--                            {index = 2, count = 3, size = 3, current = BoardImgDto(biId=34, bId=21, imgPath=/public/img/board/1681175775739_99439.png)   -->
+                </div>
+                <!--                        carouselExampleControls 이미지 옆으로 가는 버튼-->
+
+                <button class="carousel-control-prev" type="button" th:data-bs-target="'#carousel'+${b.bId}"
+                        data-bs-slide="prev">
+                    <!--                        <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleControls" data-bs-slide="prev">-->
+                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                    <span class="visually-hidden">Previous</span>
+                </button>
+                <button class="carousel-control-next" type="button" th:data-bs-target="'#carousel'+${b.bId}"
+                        data-bs-slide="next">
+                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                    <span class="visually-hidden">Next</span>
+                </button>
+            </div> <!-- // 이미지 -->
+            <div>
+                <h5 class="card-title" th:text="${b.title}"></h5>
+                <p class="card-text" th:text="${b.content}"></p>
+                <p>
+                    <th:block th:include="/board/tags"></th:block>
+                </p>
+            </div>
+        </div> <!-- // 카드 body : 이미지, 제목, 내용 -->
+
+        <div class="card-footer  d-flex align-items-center">
+            <!-- likes 를 따로빼서 재활용할 수 있다. -->
+            <!-- th:with= 해당 블럭 하위에서 likes 라는 지역 변수등록 (전역변수는 불가) -->
+            <!--                    session 에 로그인 유저가 null 이 아니면-->
+            <!--                    unless == 타임리프 else (똑같은 조건 ~ 가 아니면) -->
+            <!-- id 유일한 선택자 : likeCont'+${b.bId} -->
+            <div class="likeCont" th:id="'likeCont'+${b.bId}">
+                <!-- 좋아요 상태 불러오기 -> 1. 부모클래스에서 likeCont 가 있는걸 찾는 / 2. 이벤트 발생시 id 로 찾는 것 -->
+                <th:block th:if="${session.loginUser!=null}" th:with="likes=${b.likes}, id=${b.bId}"
+                          th:include="/board/loginLikes"></th:block> <!-- 로그인 했을때 -->
+                <th:block th:unless="${session.loginUser!=null}" th:with="likes=${b.likes}, id=${b.bId}"
+                          th:include="/board/likes"></th:block> <!-- 로그인 안했을때 -->
+            </div>
+            <small class="text-muted">•</small>
+            <div class="viewCont ms-2" data-bs-toggle="tooltip" data-bs-title="조회수" data-bs-placement="top">
+                <i class="bi bi-eye fs-4"></i>
+                조회수 : <span th:text="${b.viewCount}"></span>
+            </div>
+            <small class="text-muted mx-2">•</small>
+            <div data-bs-toggle="tooltip" data-bs-title="수정일" data-bs-placement="top">
+                <small th:text="${#dates.format(b.updateTime,'yyy-MM-dd')}"></small>
+            </div>
+        </div>
+    </div>
+</div>

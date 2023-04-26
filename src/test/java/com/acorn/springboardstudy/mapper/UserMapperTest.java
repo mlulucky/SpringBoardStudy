@@ -55,7 +55,9 @@ class UserMapperTest {
     @Test
     @Order(2)
     void findByUId() {
-        UserDto findUser=userMapper.findByUId(user.getUId());
+//        UserDto findUser=userMapper.findByUId(user.getUId());
+        UserDto findUser=userMapper.findByUId("user01");
+        System.out.println("findUser = " + findUser); // 지연로딩 호출 _ 출력
         assertNotNull(findUser);
     }
 

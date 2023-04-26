@@ -25,15 +25,15 @@ public class IntercepterConfig implements WebMvcConfigurer {
     public void addInterceptors(InterceptorRegistry registry) { // 로그인 감시, 보내기?. 🔥InterceptorRegistry registry 이게 뭐지?
         registry.addInterceptor(autoLoginInterceptor).order(1) // 자동로그인 // 서버를 껏다가(스프링 서버실행 끄기) 다시 실행 후 다시 페이지로 들어가도 자동로그인 된다.
                 .addPathPatterns("/**"); // 범위 지정
-
-
-
         registry.addInterceptor(loginCheckInterceptor).order(2) // 로그인여부 체크 // 인터셉터 추가 // order : 순서
                 .addPathPatterns("/user/**") // 패턴 추가
-                .excludePathPatterns("/user/login.do") // user 의 login.do 는 제외해라!
-                .excludePathPatterns("/user/signup.do") // exclude : 제외하다
+                .excludePathPatterns("/user/login.do") // user 의 login.do 는 제외해라! // exclude : 제외하다
+                .excludePathPatterns("/user/signup.do")
+                .excludePathPatterns("/user/emailCheck.do")
                 .addPathPatterns("/board/**")
                 .excludePathPatterns("/board/list.do") // 로그인 제외
+                .excludePathPatterns("/board/*/tagList.do") // 로그인 제외
+                .excludePathPatterns("/board/*/ajaxTagList.do") // 로그인 제외
                 .excludePathPatterns("/board/*/detail.do"); // 로그인 제외
                 // 로그인과 회원가입을 제외한 모든 페이지에 갈수없다. => 왜? 인터셉터로 막아서
         registry.addInterceptor(msgRemoveInterceptor).order(3) // 로그인 메세지 삭제

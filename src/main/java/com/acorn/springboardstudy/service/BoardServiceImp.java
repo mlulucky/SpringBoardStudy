@@ -5,11 +5,11 @@ import com.acorn.springboardstudy.dto.BoardImgDto;
 import com.acorn.springboardstudy.mapper.BoardImgMapper;
 import com.acorn.springboardstudy.mapper.BoardMapper;
 import com.acorn.springboardstudy.mapper.UserMapper;
-import com.github.pagehelper.PageHelper;
 
 import com.acorn.springboardstudy.dto.*;
 import com.acorn.springboardstudy.mapper.*;
 
+import com.github.pagehelper.PageHelper;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,25 +36,11 @@ public class BoardServiceImp implements BoardService {
 //        this.boardImgMapper = boardImgMapper;
 //    }
 
-
-
     @Override
-    public List<BoardImgDto> imgList(int[] biId) {
-        List<BoardImgDto> imgList=null;
-        if(biId!=null){
-            imgList=new ArrayList<>();
-            for(int id : biId) {
-                BoardImgDto imgDto=boardImgMapper.findByBiId(id);
-                imgList.add(imgDto);
-            }
-        }
-        return imgList; // => mapper 에서 in 사용한 반복문으로 불러오는 방법도 있다.
-    }
-
-
-    @Override
-    public List<BoardDto> tagList(String tag, UserDto loginUser) {
+    public List<BoardDto> tagList(String tag, UserDto loginUser, BoardPageDto pageDto) {
         if(loginUser!=null) userMapper.setLoginUserId(loginUser.getUId()); // 로그인한 사람
+        // 🍒맵퍼 호출하기 전에 페이징헬퍼 호출하기 => 페이징 된다. http://localhost:8080/board/홍대/tagList.do?pageNum=4
+        PageHelper.startPage(pageDto.getPageNum(),pageDto.getPageSize(),pageDto.getOrderBy()); // 페이징
         List<BoardDto> tagList=boardMapper.findByTag(tag);
         if(loginUser!=null)userMapper.setLoginUserIdNull();
         return tagList;
@@ -62,12 +48,17 @@ public class BoardServiceImp implements BoardService {
 
     // 로그인 한 사람이 없을때!
     @Override
-    public List<BoardDto> list(UserDto loginUser, PageDto pageDto) {
+    // PageHelper 트랜잭션이 걸리면 문제가 될 수 있어서 컨트롤러 => 서비스로 옮김
+    public List<BoardDto> list(UserDto loginUser, BoardPageDto pageDto) {
         // List<BoardDto> list=boardMapper.findAll(loginUserId); // 서브쿼리로 좋아요 불러오기
         if(loginUser!=null) userMapper.setLoginUserId(loginUser.getUId()); // 로그인한 유저 아이디를 mysql 서버에 변수로 등록
-        List<BoardDto> list=this.boardMapper.findAll(pageDto); // 불러올때 페이징도 불러오기 // 지연로딩으로 좋아요 불러오기
-        int totalRows=boardMapper.countAll(pageDto);
-        pageDto.setTotalRows(totalRows);
+        PageHelper.startPage(pageDto.getPageNum(),pageDto.getPageSize(),pageDto.getOrderBy());
+
+        // List<BoardDto> list=this.boardMapper.findAll(pageDto); // 불러올때 페이징도 불러오기 // 지연로딩으로 좋아요 불러오기
+        // int totalRows=boardMapper.countAll(pageDto);
+        // pageDto.setTotalRows(totalRows);
+//        PageHelper.startPage(2,5,"b_id");
+        List<BoardDto> list=boardMapper.findAll(pageDto);
         if(loginUser!=null)  userMapper.setLoginUserIdNull(); // 사용이 끝나서 삭제 // 지연로딩으로 조인이 조금 늦어서 불러오기전에 먼저 삭제를 해서(null 을 만듬) 상태가 자꾸 null 이 됨.
         // 보드에서 조회할때는 즉시로딩으로 바꾸기
         return list;
@@ -102,15 +93,17 @@ public class BoardServiceImp implements BoardService {
     }
 
     @Override
-    @Transactional // 보드 등록시 이미지 등록 -> 실패시 롤백하려고~! 🍋중간에 값이 하나라도 잘못되면 등록이 취소가 된다.
+    @Transactional // 보드 등록시 이미지 등록 -> 실패시 롤백하려고~!
+    // 🍋중간에 등록이 하나라도 잘못되면 등록이 취소가 된다.
     public int register(BoardDto board, List<String> tags) {
-        // 🍉bId 가 처음에 null
+        // 🍉이미지 등록시 bId 가 처음에 null
         int register=0;
-        // 🍉insert 할때 bId 가 생성되고 그 값을 마이바티스가 파라미터인 board 에 전달
+        // 🍉insert 할때 bId 가 생성(auto_increment)되고 그 값을 마이바티스가 파라미터인 board 에 전달
         register=boardMapper.insertOne(board); // 게시글 등록
+        // 이미지 등록시
         if(board.getImgs()!=null){ // img 가 null 이 아니면
             for(BoardImgDto img : board.getImgs()){ // 🍉이미지에 게시글 번호를 알수없다 => 이미지에 게시글 번호 정해주기!
-                img.setBId(board.getBId()); // 🍉생성된 bId 를 이미지에 저장
+                img.setBId(board.getBId()); // 🍉이미지 등록할때 생성된 bId 를 이미지에 저장
                 register+=boardImgMapper.insertOne(img); // 이미지 등록
             }
         }
@@ -128,13 +121,34 @@ public class BoardServiceImp implements BoardService {
             return register;
     }
 
+
+    // 🍒수정시 이미지 삭제하려고, 이미지 리스트 불러오기
+    @Override
+    public List<BoardImgDto> imgList(int[] biId) {
+        List<BoardImgDto> imgList=null;
+        if(biId!=null){ // 이미지 아이디가 있으면
+            imgList=new ArrayList<>();
+            for(int id : biId) {
+                BoardImgDto imgDto=boardImgMapper.findByBiId(id);
+                imgList.add(imgDto);
+            }
+        }
+        return imgList; // => mapper 에서 in 사용한 반복문으로 불러오는 방법도 있다.
+    }
+
     @Override
     @Transactional // 이중에 하나라도 문제가 되서 오류가 뜨면 작업을 취소한다. => modify 0 이 반환된다.
     public int modify(BoardDto board, int[] delImgIds, List<String> tags, List<String> delTags) {
         int modify=boardMapper.updateOne(board);
+        if(board.getImgs()!=null){
+            for(BoardImgDto img : board.getImgs()){
+                img.setBId(board.getBId());
+                modify+=boardImgMapper.insertOne(img);
+            }
+        }
         if(delImgIds!=null){
             for(int biId : delImgIds){
-                // 삭제하기 전에 이미지아이디로 이미지 조회해서 이미지 삭제하기
+                // 삭제하기 전에 이미지아이디로 이미지 조회해서 이미지 삭제하기 => 🍒주석된 부분들은 modify 서비스에서 이미지 삭제하는 법(컨트롤러에서 삭제x)
 //                BoardImgDto img=boardImgMapper.findByBiId(biId); // 이미지 파일 삭제하기 위해 파일을 조회하기~!
                 modify+=boardImgMapper.deleteOne(biId); // 이미지파일 db 에서 지우기
 //                File imgFile=new File(staticPath+img.getImgPath()); // 파일 찾기
