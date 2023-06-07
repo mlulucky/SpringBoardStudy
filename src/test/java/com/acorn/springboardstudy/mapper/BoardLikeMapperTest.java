@@ -16,6 +16,7 @@ class BoardLikeMapperTest {
     @Test
     void findByBIdAndUId(){
         BoardLikeDto boardLikeDto = boardLikeMapper.findByBIdAndUId(1,"user01");
+        System.out.println("boardLikeDto = " + boardLikeDto);
         assertNotNull(boardLikeDto);
     }
     @Test

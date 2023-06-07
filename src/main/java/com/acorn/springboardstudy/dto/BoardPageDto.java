@@ -4,7 +4,7 @@ import lombok.Data;
 
 @Data // getter,setter => @ModelAttribute 를 쓸 수 있다.
 public class BoardPageDto { // public - 다른곳에서 import 할 수 있음
-    enum BoardsType { // 🔥왜 private 안붙이는가 ?   // sql injection 을 막으려고
+    public enum BoardsType { // 🔥왜 private 안붙이는가 ?   // sql injection 을 막으려고
         b_id,
         u_id,
         post_time,

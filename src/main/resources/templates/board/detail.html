@@ -313,7 +313,7 @@
                     // json 의 key 값이 있는것만 대입
                     if (key in json) {
                         if (key === "imgPath") { // 🍏이미지 input 태그의 value => name 으로 이미지 불러오기
-                            input.src = json[key]; // input 요소
+                            input.src = json[key]; // input 요소 // img 태그에는 name 속성이 없는데, input 인 마냥 찾는 것.
                         }
                         input.value = json[key]; // src 요소 // json 에서 키값으로 가져온는것  json[brId] = 117 를 input value 에 대입
                     }

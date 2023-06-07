@@ -19,7 +19,7 @@
         <association property="likes"
                         select="com.acorn.springboardstudy.mapper.BoardLikeMapper.countStatusByBId"
                         column="b_id"
-                        fetchType="eager"/>
+                        fetchType="eager"/> <!-- eager 하는 이유 ?  -->
         <association property="user"
                     select="com.acorn.springboardstudy.mapper.UserMapper.findByUId"
                     column="u_id"

@@ -112,6 +112,8 @@ CREATE TABLE hashtags
 (
     tag VARCHAR(255) PRIMARY KEY COMMENT '태그 내용'
 );
+
+
 #게시글에 해시태그 추가
 CREATE TABLE board_hashtags
 (
@@ -122,6 +124,8 @@ CREATE TABLE board_hashtags
     FOREIGN KEY (b_id) REFERENCES boards (b_id) ON DELETE CASCADE ON UPDATE CASCADE,
     FOREIGN KEY (tag) REFERENCES hashtags (tag) ON DELETE CASCADE ON UPDATE CASCADE
 );
+
+
 #댓글에 해시태그 추가
 CREATE TABLE reply_hashtags
 (

@@ -12,8 +12,8 @@
     </insert>
     <update id="updateOne" parameterType="ReplyLikeDto">
         UPDATE reply_likes SET status=#{status} WHERE u_id=#{uId} AND br_id=#{brId}
-#         pk 로 찾는게 어려워서? uId, brId 로 찾는..? 3/30 수업참고하기!
     </update>
+<!--        pk 로 찾는게 어려워서? uId, brId 로 찾는..? 3/30 수업참고하기!-->
     <delete id="deleteOne" parameterType="ReplyLikeDto">
         DELETE FROM reply_likes WHERE u_id=#{uId} AND br_id=#{brId}
     </delete>

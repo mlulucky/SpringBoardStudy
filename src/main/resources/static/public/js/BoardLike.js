@@ -30,6 +30,7 @@ async function boardLikeHandler(status,bId){
     // likes 에 bId 가 없어서 받아와야 한다. => 대괄호 두개 => 타임리프를 불러오는것!
 }
 
+// like 내역 불러오기 함수
 async function readLike(bId){
     let url=`/board/like/${bId}/read.do`;
     const resp=await fetch(url);
